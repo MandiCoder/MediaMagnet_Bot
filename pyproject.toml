@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "mediamagnet"
+version = "0.1.0"
+description = ""
+authors = ["Rey <baitycasper@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pyrogram = "^2.0.106"
+aiohttp = "^3.8.6"
+tgcrypto = "^1.2.5"
+yt-dlp = "^2023.10.13"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
