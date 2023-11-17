@@ -1,5 +1,6 @@
 from pyrogram.methods.utilities.idle import idle
-from pyrogram import Client, filters
+from modules.ansi import green
+from pyrogram import Client
 from aiohttp import ClientSession
 from asyncio import sleep as asyncsleep
 from aiohttp import web
@@ -41,9 +42,9 @@ class PyrogramInit():
         runner = web.AppRunner(server)
         
         await self.app.start()
-        print('BOT INICIADO')
+        print(green('BOT INICIADO'))
         
         await runner.setup()
         await web.TCPSite(runner, host='0.0.0.0', port=self.PORT).start()
-        print('SERVER INICIADO')
+        print(green('SERVER INICIADO'))
     

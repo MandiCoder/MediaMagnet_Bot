@@ -1,3 +1,4 @@
+from modules.ansi import green, purple
 import subprocess
 import time
 import os
@@ -8,18 +9,18 @@ os.environ["SESSION_STRING"] = 'AQFfwxsAEXP6WV1eL8byuyMrwe2zD863B-rvQKe3iCfrNH72
 os.environ["PORT"] = '8000'
 os.environ["BOT_USER"] = 'KOD_16'
 os.environ["API_HASH"] = 'ff9d2b13d574fd0206a14bd3ceac7502'
-os.environ["BOT_TOKEN"] = '23053083'
+os.environ["API_ID"] = '23053083'
 
 comando = ['python3', 'main.py']
 proceso = subprocess.Popen(comando)
 
 while True:
-    rd = input('Escriba (exit) para salir o presione enter para reiniciar el Bot: \n\n')
+    rd = input(green('Escriba (exit) para salir o presione Enter para reiniciar el Bot: \n\n'))
     if rd == 'exit':
         proceso.terminate()
         break
     else:
-        print('\nReiniciando Bot...')
+        print(purple("\nReiniciando Bot..."))
         proceso.terminate()
         time.sleep(5)
         proceso = subprocess.Popen(comando)

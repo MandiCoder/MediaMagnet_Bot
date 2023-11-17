@@ -1,13 +1,21 @@
 from os import listdir
-from os.path import join, isfile, getsize
+from os.path import join, isfile, getsize, basename
 from modules.global_variables import *
-from time import sleep
+from time import sleep, time as tm
+from pyrogram.types import ReplyKeyboardMarkup
+from .progres_bar import progressddl
 
-def showFiles(app, msg, usr, name_app):
+def showFiles(app, msg, usr, name_app=None):
     
-    listfiles = ""
+    listfiles = "**--📁 Archivos descargados--**\n"
     totalSize = 0
     fileList = {}
+    
+    btn = ReplyKeyboardMarkup([
+        ['📁 Archivos', '⚙️ Opciones'],
+        ['📤 Subir todo', '🗂 Subir album'],
+        ['🗑 BORRAR TODO']
+    ], resize_keyboard=True, one_time_keyboard=True)
     
     for count, file in enumerate(listdir(usr)):
         count+=1
@@ -21,8 +29,9 @@ def showFiles(app, msg, usr, name_app):
             fileList[count] = join(usr, file)
             
         userFiles[usr] = fileList
-    
-    msg.reply(listfiles)
+        
+        
+    msg.reply(listfiles, reply_markup=btn)
     
     
     
@@ -34,12 +43,17 @@ def download_files_telegram(app, username):
     folder_files = {username: []}
 
     while not queue.empty():
-        sleep(3)
         message, directory = queue.get()
-        sms = message.reply("**🚛 Downloading...**", quote=True)
+        sms = message.reply("**🚛 Descargando...**", quote=True)
+        sleep(3)
         
-        file = app.download_media(message=message, file_name=f"{directory}/",)
-        folder_files[username].append(file.split("\\")[-1])
+        start = tm()
+        file = app.download_media(message=message, 
+                                  file_name=f"{directory}/",
+                                  progress=progressddl, 
+                                  progress_args=(sms, start, queue.qsize()),)
+        
+        folder_files[username].append(basename(file))
         sms.edit_text("✅ **Finished**")
         queue.task_done()
         
