@@ -37,13 +37,13 @@ def mostrar_archivos(app, msg):
 
 
 
-# ------------------------------------------------------------------------- VER ARCHIVOS DESCARGADOS
+# ------------------------------------------------------------------------- BORRAR TODOS LOS ARCHIVOS
 @bot.app.on_message(filters.regex('🗑 BORRAR TODO'))
 def borrar_todo(app, msg):
-    for c, i in enumerate(msg.from_user.username):
+    for c, i in enumerate(listdir(msg.from_user.username)):
         c+1
-        join(msg.from_user.username, i)
-    msg.reply(f'**✅ {c} Archivos eliminados**')
+        unlink(join(msg.from_user.username, i))
+    msg.reply(f'**✅ {c+1} Archivos eliminados**')
     
     
     
@@ -53,7 +53,7 @@ def borrar_todo(app, msg):
 @bot.app.on_message(filters.regex('http'))
 def descargar_archivos(app, msg):
     if not exists(msg.from_user.username): mkdir(msg.from_user.username)
-    downloadFiles(app, msg, msg.from_user.username)
+    downloadFiles(app, msg, msg.from_user.username, bot.user_bot)
     
     
 

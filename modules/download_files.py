@@ -1,20 +1,20 @@
 import yt_dlp
+from .progres_bar import progressddl, progresswget
+from time import time
 from classes.get_info import getInfo
 from unicodedata import normalize
 from os.path import join, basename
 from modules.wget import download
 from user_agent import generate_user_agent
-from .progres_bar import progresswget
 from requests import get
+from pyrogram.errors import ChannelInvalid
 
 
 
 
 
-def downloadFiles(app, msg, usr):
-    
+def downloadFiles(app, msg, usr, userbot):
     URL = msg.text
-    
     
     ##################################################### DESCARGAR VIDEOS SHORTS DE YOUTUBE
     if 'https://youtu' and 'short' in URL:
@@ -71,5 +71,40 @@ def downloadFiles(app, msg, usr):
                 sms.edit_text("✅ **Descarga completa**")
             except Exception as x:
                 sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
+
+
+
+
+    ###################################################### DESCARGAR ARCHIVOS DE CANALES REESTRINGIDOS
+    if URL.startswith("https://t.me/"):
+        sms = msg.reply("📥 **Descargando archivo...**")
+        if URL.endswith("?single"): URL = URL.replace("?single", "")
+
+        if URL.startswith("https://t.me/c/"):
+            try:
+                chat = "-100" + URL.split("/")[-2]
+                msg_id = URL.split("/")[-1]
+                msge = userbot.get_messages(int(chat), int(msg_id))
+                if msge.media:
+                    start = time()
+                    file = userbot.download_media(msge, file_name=f"{usr}/", progress=progressddl, progress_args=(sms, start, 0))
+                    sms.edit_text("✅ **Descarga completa**")
+            except ChannelInvalid:
+                try: sms.delete()
+                except: pass
+                sms.edit_text("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
+        else:
+            try:
+                chat = URL.split("/")[-2]
+                msg_id = URL.split("/")[-1]
+                msge = userbot.get_messages(chat, int(msg_id))
+                if msge.media:
+                    start = time()
+                    file = userbot.download_media(msge, file_name=f"{usr}/", progress=progressddl, progress_args=(sms, start, 0))
+                    sms.edit_text("✅ **Descarga completa**")
+            except ChannelInvalid:
+                try: sms.delete()
+                except: pass
+                sms.edit_text("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
 
         
