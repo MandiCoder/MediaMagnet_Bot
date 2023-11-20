@@ -20,10 +20,10 @@ def showFiles(app, msg, usr, name_app=None):
     for count, file in enumerate(listdir(usr)):
         count+=1
         if isfile(join(usr, file)):
-            link = f"https://{name_app}.onrender.com/file/{usr}/{file}"
+            
             size = round(getsize(join(usr, file)) / 1000024, 2)
             
-            listfiles += (f"\n❯ **/op_{count} - {size} MB - [{file}]({link})**\n")
+            listfiles += (f"\n❯ **/op_{count} - {size} MB - `{file}`**\n")
             
             totalSize += size
             fileList[count] = join(usr, file)

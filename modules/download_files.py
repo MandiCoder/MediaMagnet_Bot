@@ -1,5 +1,6 @@
 import yt_dlp
 from .progres_bar import progressddl, progresswget
+from .mediafire import get as getmf
 from time import time
 from classes.get_info import getInfo
 from unicodedata import normalize
@@ -8,6 +9,7 @@ from modules.wget import download
 from user_agent import generate_user_agent
 from requests import get
 from pyrogram.errors import ChannelInvalid
+
 
 
 
@@ -48,7 +50,7 @@ def downloadFiles(app, msg, usr, userbot):
     elif "mediafire" in URL:
         sms = msg.reply("📥 **Descargando archivo...**")
         try:
-            download(get(URL), sms, app, out=f"{usr}", bar=progresswget)
+            download(getmf(URL), sms, app, out=f"{usr}", bar=progresswget)
             sms.edit_text("✅ **Descarga completa**")
         except Exception as x:
             sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")

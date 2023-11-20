@@ -65,11 +65,15 @@ def descargar_archivos(app, msg):
 @bot.app.on_message(filters.regex("/op_"))
 def opcionesArchivo(app, msg):
     file = userFiles[msg.from_user.username][int(msg.text.split('_')[-1])]
+    url = f"https://{bot.NAME_APP}.onrender.com/file/{msg.from_user.username}/{file}".replace(' ', '%20')
+    # http://127.0.0.1:8000/file/KOD_16/
+    
     btn = InlineKeyboardMarkup([
         [InlineKeyboardButton('⬆️ SUBIR ARCHIVO', callback_data=f'upload {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('📝 CAMBIAR NOMBRE', callback_data=f'rename {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('🚮 ELIMINAR ARCHIVO', callback_data=f'del_file {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('🌄 AGREGAR IMAGEN', callback_data=f'add_thumb {msg.text.split("_")[-1]}')],
+        [InlineKeyboardButton('🔗 ENLACE', url=url)],
     ])
     msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=btn)
 
