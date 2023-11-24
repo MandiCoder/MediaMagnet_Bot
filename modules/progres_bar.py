@@ -66,13 +66,13 @@ def progressddl(current, total, msg, start, rest=0):
 # ===============================================================================# PROGRESS UPLOAD
 
 
-async def progressupl(current, total, sms, totalFiles, count, start):
+def progressupl(current, total, sms, totalFiles, count, start):
     global sec
     act = time() - start
     speed = round((round(current / 1000000, 2) / act), 2)
     if sec != localtime().tm_sec:
         try:
-            await sms.edit_text(
+            sms.edit_text(
                 f"**📤 Subiendo: {count}-{totalFiles}\n__{update_progress_bar(current,total)}__\n🗄 Total :{round(total/1000000,2)} MB \n🗂 Subido: {round(current/1000000,2)}\n⚡️ Velocidad: {speed} MB/s**"
             )
         except:

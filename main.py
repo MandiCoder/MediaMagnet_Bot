@@ -1,14 +1,16 @@
 # MIS MODULOS
+from modules.download_files_telegram import download_files_telegram
 from modules.pyrogram_init import PyrogramInit
-from modules.functions import *
+from modules.show_files import showFiles
 from modules.global_variables import *
 from modules.download_files import downloadFiles
 from modules.upload_files import uploadFile
+from modules.database import create_db
 # MODULOS EXTERNOS
 from pyrogram import filters
 from pyrogram.types import (ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ForceReply)
 from os.path import exists, join, basename
-from os import mkdir, unlink, rename
+from os import mkdir, unlink, rename, listdir
 from queue import Queue as cola
 
 bot = PyrogramInit()
@@ -21,6 +23,7 @@ def enviar_mensajes(app, msg):
         ['🗑 BORRAR TODO']
     ], resize_keyboard=True, one_time_keyboard=True)
     
+    create_db(msg.from_user.username)
     msg.reply('Bienvenido a mi bot :v', reply_markup=btn)
     
 
@@ -30,8 +33,7 @@ def enviar_mensajes(app, msg):
 # ------------------------------------------------------------------------- VER ARCHIVOS DESCARGADOS
 @bot.app.on_message(filters.regex('📁 Archivos'))
 def mostrar_archivos(app, msg):
-    if not exists(msg.from_user.username): mkdir(msg.from_user.username)
-    showFiles(app, msg, msg.from_user.username, bot.NAME_APP)
+    showFiles(msg, msg.from_user.username)
 
 
 
@@ -54,7 +56,7 @@ def borrar_todo(app, msg):
 def descargar_archivos(app, msg):
     if not exists(msg.from_user.username): mkdir(msg.from_user.username)
     downloadFiles(app, msg, msg.from_user.username, bot.user_bot)
-    
+    showFiles(msg, msg.from_user.username)
     
 
 
@@ -95,7 +97,7 @@ def cambiarNombre(app, msg):
            join(msg.from_user.username, msg.text))
     
     msg.reply(f'✅ Nombre cambiado a: `{msg.text}')
-    showFiles(app, msg, msg.from_user.username,)
+    showFiles(msg, msg.from_user.username)
 
 
 
@@ -105,7 +107,9 @@ def cambiarNombre(app, msg):
 def subirArchivo(app, callback):
     file = userFiles[callback.from_user.username][int(callback.data.split(' ')[-1])]
     callback.message.delete()
-    uploadFile(app, callback.message, file)
+   
+    
+    uploadFile(app, callback.message, file, callback.from_user.username)
 
 
 
@@ -117,7 +121,7 @@ def elimiarArchivo(app, callback):
     file = userFiles[callback.from_user.username][int(callback.data.split(' ')[-1])]
     unlink(file)
     callback.message.edit(f'✅ {basename(file)} eliminado')
-
+    showFiles(callback.message, callback.from_user.username)
 
 
 
@@ -125,13 +129,16 @@ def elimiarArchivo(app, callback):
 # ---------------------------------------------------------------------- DESCARGAR ARCHIVOS DE TELEGRAM
 @bot.app.on_message(filters.media & filters.private)
 def descargarArchivosTelegram(app, message):
-    if message.from_user.username in download_queues:
-        download_queues[message.from_user.username].put( (message, message.from_user.username) )
+    username = message.from_user.username
+    path_user = join('downloads', username)
+
+    if username in download_queues:
+        download_queues[username].put( (message, path_user) )
     else:
         queue = cola()
-        queue.put( (message, message.from_user.username) )
-        download_queues[message.from_user.username] = queue
-        download_files_telegram(app, message.from_user.username)
+        queue.put( (message, path_user) )
+        download_queues[username] = queue
+        download_files_telegram(app, username)
 
 
 
