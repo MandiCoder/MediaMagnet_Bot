@@ -32,6 +32,10 @@ def read_db(username:str) -> dict:
     
     
 def update_db(username:str, clave:str, valor:str):
+    """ 
+    Parametros:
+    `clave:` zip_size
+    """
     with open(join('db', f'{username}.json'), "r") as f:
         data = load(f)
         data[clave] = valor

@@ -1,11 +1,12 @@
 # MIS MODULOS
+from curses.ascii import isdigit
 from modules.download_files_telegram import download_files_telegram
 from modules.pyrogram_init import PyrogramInit
 from modules.show_files import showFiles
 from modules.global_variables import *
 from modules.download_files import downloadFiles
 from modules.upload_files import uploadFile
-from modules.database import create_db
+from modules.database import create_db, update_db, read_db
 # MODULOS EXTERNOS
 from pyrogram import filters
 from pyrogram.types import (ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ForceReply)
@@ -13,18 +14,13 @@ from os.path import exists, join, basename
 from os import mkdir, unlink, rename, listdir
 from queue import Queue as cola
 
+
 bot = PyrogramInit()
 
 @bot.app.on_message(filters.command('start'))
 def enviar_mensajes(app, msg):
-    btn = ReplyKeyboardMarkup([
-        ['📁 Archivos', '⚙️ Opciones'],
-        ['📤 Subir todo', '🗂 Subir album'],
-        ['🗑 BORRAR TODO']
-    ], resize_keyboard=True, one_time_keyboard=True)
-    
     create_db(msg.from_user.username)
-    msg.reply('Bienvenido a mi bot :v', reply_markup=btn)
+    msg.reply('Bienvenido a mi bot :v', reply_markup=btn_general)
     
 
     
@@ -39,17 +35,44 @@ def mostrar_archivos(app, msg):
 
 
 
-# ------------------------------------------------------------------------- BORRAR TODOS LOS ARCHIVOS
-@bot.app.on_message(filters.regex('🗑 BORRAR TODO'))
-def borrar_todo(app, msg):
-    for c, i in enumerate(listdir(msg.from_user.username)):
-        c+1
-        unlink(join(msg.from_user.username, i))
-    msg.reply(f'**✅ {c+1} Archivos eliminados**')
+# ------------------------------------------------------------------------- BORRAR TODOS LOS ARCHIVOS 🗑
+@bot.app.on_callback_query(filters.create(lambda f, c, u: "borrar_todo" in u.data))
+def borrarTodo(app, callback):
+    path_downloads = join('downloads', callback.from_user.username)
+    for c, i in enumerate(listdir(path_downloads)):
+        unlink(join(path_downloads, i))
+    callback.message.reply(f'**✅ {c+1} Archivos eliminados**')
     
     
     
     
+
+# ------------------------------------------------------------------------- OPCIONES GENERALES ⚙️
+@bot.app.on_message(filters.regex('⚙️ Opciones'))
+def mostrar_opciones(app, msg):
+    
+    text = f'Zip size: `{read_db(msg.from_user.username)["zip_size"]} MB`'
+    msg.reply(f'**⚙️ Opciones:\n\n {text}**', reply_markup=btn_opciones)
+
+
+# -------------------------------------------------- ZIP SIZE
+@bot.app.on_callback_query(filters.create(lambda f, c, u: "zip_size" in u.data))
+def zip_size(app, callback):
+    callback.message.delete()
+    callback.message.reply('📚 Introduzca el tamaño de los zips:', reply_markup=ForceReply())
+
+@bot.app.on_message(filters.reply & filters.create(lambda f, c, u: u.reply_to_message.text.startswith('📚 Introduzca el tamaño de los zips:')))
+def cambiarPesoZips(app, msg):
+    zip_size = msg.text
+
+    if zip_size.isdigit() :
+        if int(zip_size) <= 2000 and int(zip_size) >= 10:
+            update_db(username=msg.from_user.username, clave='zip_size', valor=zip_size)
+            msg.reply(f'**✅ Zips establecidos en: `{zip_size} MB`', reply_markup=btn_general)
+        else:
+            msg.reply('**❌ ERROR: Debe introducir un numero --mayor-- que 10 y --menor-- que 2000**', reply_markup=btn_general)
+    else:
+        msg.reply('**❌ ERROR: Debe introducir un numero**', reply_markup=btn_general)
     
 # ---------------------------------------------------------------------- DESCARGAR ARCHIVOS Y VIDEOS
 @bot.app.on_message(filters.regex('http'))
@@ -63,7 +86,7 @@ def descargar_archivos(app, msg):
 
 
 
-# ------------------------------------------------------------------------- OPCIONES DEL ARCHIVO
+# ------------------------------------------------------------------------- OPCIONES DEL ARCHIVO ⚙️
 @bot.app.on_message(filters.regex("/op_"))
 def opcionesArchivo(app, msg):
     file = userFiles[msg.from_user.username][int(msg.text.split('_')[-1])]
@@ -91,12 +114,16 @@ def renombrarArchivo(app, callback):
     callback.message.reply(f'**📝 Introduce el nuevo nombre para: `{basename(file)}`**', 
                           reply_markup=ForceReply(placeholder='Nuevo nombre'))
 
-@bot.app.on_message(filters.reply)
+
+@bot.app.on_message(filters.create(lambda f, c, u: u.reply_to_message.text.startswith('📝 Introduce el nuevo nombre para:')))
 def cambiarNombre(app, msg):
-    rename(join(msg.from_user.username, msg.reply_to_message.text.split(': ')[-1]), 
-           join(msg.from_user.username, msg.text))
+    user = msg.from_user.username
+    path_downloads = join('downloads', user)
     
-    msg.reply(f'✅ Nombre cambiado a: `{msg.text}')
+    rename(join(path_downloads, msg.reply_to_message.text.split(': ')[-1]), 
+           join(path_downloads, msg.text))
+    
+    msg.reply(f'**✅ Nombre cambiado a: `{msg.text}`**')
     showFiles(msg, msg.from_user.username)
 
 

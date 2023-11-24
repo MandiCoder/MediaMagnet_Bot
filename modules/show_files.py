@@ -1,7 +1,7 @@
 from os import listdir, makedirs
 from os.path import join, isfile, getsize, exists
 from modules.global_variables import *
-from pyrogram.types import ReplyKeyboardMarkup
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 
@@ -16,12 +16,9 @@ def showFiles(msg, usr):
     
     if not exists(path_user): makedirs(path_user)
 
-    btn = ReplyKeyboardMarkup([
-        ['📁 Archivos', '⚙️ Opciones'],
-        ['📤 Subir todo', '🗂 Subir album'],
-        ['🗑 BORRAR TODO']
-    ], resize_keyboard=True, one_time_keyboard=True)
-    
+    btn = InlineKeyboardMarkup([
+        [InlineKeyboardButton('🗑 BORRAR TODO', callback_data='borrar_todo')]
+    ])
     for count, file in enumerate(listdir(path_user)):
         path_files = join(path_user, file)
         if isfile(path_files):

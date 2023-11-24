@@ -7,7 +7,7 @@ from pyrogram import enums
 from time import time
 
 def uploadFile(app, msg, file, username):
-    size_file = read_db(username)["zip_size"]
+    size_file = int(read_db(username)["zip_size"])
 
     if (round(getsize(file) / 1000000, 2) > size_file):
         splitFiles(app, msg, file, username, size_file)
