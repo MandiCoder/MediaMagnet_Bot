@@ -22,6 +22,7 @@ def uploadFile(app, msg, file, username):
             file,
             progress=progressupl,
             progress_args=(sms, 1, 1, start),
+            reply_to_message_id=msg.id
         )
         sms.delete()
 
@@ -32,7 +33,8 @@ def splitFiles(app, msg, file, username, size_file):
     path_zip = join('downloads', 'folder_zip', username)
     chat_id = msg.chat.id
 
-    if not exists(path_zip): makedirs(path_zip)
+    if not exists(path_zip): 
+        makedirs(path_zip)
 
     sms = msg.reply(f'**Subiendo: `{file.split("/")[-1]}`...**')
     sms.edit(f"✂️ **Dividiendo en partes de: {size_file} MB**") 
@@ -40,7 +42,7 @@ def splitFiles(app, msg, file, username, size_file):
     split(file, path_zip, getBytes(f"{size_file}.0MiB"))
     list_files = listdir(path_zip)
     sms.delete()
-    pin = sms.reply(f'**📌 {basename(file)}**')
+    sms.reply(f'**📌 {basename(file)}**')
     
     for count, file in enumerate(list_files):
         path_file = join(path_zip, file)

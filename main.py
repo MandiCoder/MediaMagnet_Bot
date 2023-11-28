@@ -1,17 +1,17 @@
 # MIS MODULOS
-from curses.ascii import isdigit
+from time import sleep
 from modules.download_files_telegram import download_files_telegram
 from modules.pyrogram_init import PyrogramInit
 from modules.show_files import showFiles
-from modules.global_variables import *
+from modules.global_variables import btn_general, btn_opciones, userFiles, download_queues
 from modules.download_files import downloadFiles
 from modules.upload_files import uploadFile
 from modules.database import create_db, update_db, read_db
 # MODULOS EXTERNOS
 from pyrogram import filters
-from pyrogram.types import (ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ForceReply)
+from pyrogram.types import (InlineKeyboardButton, InlineKeyboardMarkup, ForceReply)
 from os.path import exists, join, basename
-from os import mkdir, unlink, rename, listdir
+from os import makedirs, unlink, rename, listdir
 from queue import Queue as cola
 
 
@@ -20,7 +20,12 @@ bot = PyrogramInit()
 @bot.app.on_message(filters.command('start'))
 def enviar_mensajes(app, msg):
     create_db(msg.from_user.username)
-    msg.reply('Bienvenido a mi bot :v', reply_markup=btn_general)
+
+    if not msg.from_user.username == 'MandiCoder':
+        msg.reply('Este bot solo lo puede usar su creador @MandiCoder 😛')
+        return
+    else: 
+        msg.reply('Bienvenido a mi bot :v', reply_markup=btn_general)
     
 
     
@@ -39,9 +44,11 @@ def mostrar_archivos(app, msg):
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "borrar_todo" in u.data))
 def borrarTodo(app, callback):
     path_downloads = join('downloads', callback.from_user.username)
+    c = 0
     for c, i in enumerate(listdir(path_downloads)):
+        c+1
         unlink(join(path_downloads, i))
-    callback.message.reply(f'**✅ {c+1} Archivos eliminados**')
+    callback.message.reply(f'**✅ {c} Archivos eliminados**')
     
     
     
@@ -75,16 +82,33 @@ def cambiarPesoZips(app, msg):
         msg.reply('**❌ ERROR: Debe introducir un numero**', reply_markup=btn_general)
     
 # ---------------------------------------------------------------------- DESCARGAR ARCHIVOS Y VIDEOS
-@bot.app.on_message(filters.regex('http'))
+@bot.app.on_message(filters.regex('http') & filters.private)
 def descargar_archivos(app, msg):
-    if not exists(msg.from_user.username): mkdir(msg.from_user.username)
-    downloadFiles(app, msg, msg.from_user.username, bot.user_bot)
-    showFiles(msg, msg.from_user.username)
+    if not msg.from_user.username == 'MandiCoder':
+        msg.reply('Este bot solo lo puede usar su creador @MandiCoder 😛')
+        return
     
+    path_user = join('downloads', msg.from_user.username)
+    if not exists(path_user): 
+        makedirs(path_user)
+    downloadFiles(app, msg, path_user, bot.user_bot, msg.text)
 
+# ================================================ DESCARGAR ARCHIVOS EN CANALES
+@bot.app.on_message(filters.group & filters.command('dl'))
+def descargarArchivosEnGrupos(app, msg):
+    username = msg.from_user.username
+    path = join('temp', username)
+    create_db(username)
+    if not exists(path): 
+        makedirs(path)
+    
+    downloadFiles(app, msg, path, bot.user_bot, msg.text.split(' ')[1])
 
-
-
+    for i in listdir(path):
+        file = join('temp', username, i)
+        uploadFile(app, msg, file, username)
+        unlink(file)
+        sleep(1)
 
 # ------------------------------------------------------------------------- OPCIONES DEL ARCHIVO ⚙️
 @bot.app.on_message(filters.regex("/op_"))
@@ -115,7 +139,7 @@ def renombrarArchivo(app, callback):
                           reply_markup=ForceReply(placeholder='Nuevo nombre'))
 
 
-@bot.app.on_message(filters.create(lambda f, c, u: u.reply_to_message.text.startswith('📝 Introduce el nuevo nombre para:')))
+@bot.app.on_message(filters.reply & filters.create(lambda f, c, u: u.reply_to_message.text.startswith('📝 Introduce el nuevo nombre para:')))
 def cambiarNombre(app, msg):
     user = msg.from_user.username
     path_downloads = join('downloads', user)
@@ -156,6 +180,10 @@ def elimiarArchivo(app, callback):
 # ---------------------------------------------------------------------- DESCARGAR ARCHIVOS DE TELEGRAM
 @bot.app.on_message(filters.media & filters.private)
 def descargarArchivosTelegram(app, message):
+    if not message.from_user.username == 'MandiCoder':
+        message.reply('Este bot solo lo puede usar su creador @MandiCoder 😛')
+        return
+    
     username = message.from_user.username
     path_user = join('downloads', username)
 
