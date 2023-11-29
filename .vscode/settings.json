@@ -1,3 +1,4 @@
 {
-    "docwriter.language": "Spanish"
+    "docwriter.language": "Spanish",
+    "editor.inlineSuggest.showToolbar": "onHover"
 }

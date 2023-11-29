@@ -1,3 +1,5 @@
+from classes.file_type import fileType
+from modules.extract_info_video import extractInfoVideo
 from .progres_bar import progressupl
 from os.path import getsize, exists, join, basename
 from os import makedirs, listdir, unlink
@@ -16,14 +18,16 @@ def uploadFile(app, msg, file, username):
         sms = msg.reply(f"**🚀 Subiendo: {basename(file)}**")
         chat_id = msg.chat.id
         start = time()
-        app.send_chat_action(chat_id, enums.ChatAction.UPLOAD_DOCUMENT)
-        app.send_document(
-            chat_id,
-            file,
-            progress=progressupl,
-            progress_args=(sms, 1, 1, start),
-            reply_to_message_id=msg.id
-        )
+        if fileType(file=file).isVideo():
+            thumb, seconds = extractInfoVideo(file, username)
+            app.send_chat_action(chat_id, enums.ChatAction.UPLOAD_VIDEO)
+            app.send_video(chat_id, file, progress=progressupl, progress_args=(sms, 1, 1, start), 
+                           duration=seconds, thumb=thumb, reply_to_message_id=msg.id, caption=f'**{basename(file)}**')
+            unlink(thumb)
+        else:
+            app.send_chat_action(chat_id, enums.ChatAction.UPLOAD_DOCUMENT)
+            app.send_document(chat_id, file, progress=progressupl, progress_args=(sms, 1, 1, start), 
+                              reply_to_message_id=msg.id)
         sms.delete()
 
         

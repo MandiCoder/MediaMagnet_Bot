@@ -1,5 +1,4 @@
 import yt_dlp
-from modules.show_files import showFiles
 from modules.wget import download
 from .progres_bar import progressddl, progresswget
 from .mediafire import get as getmf
@@ -27,12 +26,12 @@ def downloadFiles(app, msg, path_download, userbot, url):
             
             with yt_dlp.YoutubeDL(options) as ydl: 
                 ydl.download([url]) 
-            sms.delete() 
+                
+            return sms
         except Exception as x:
             msg.reply(x)
         
         
-    
     
     
     ###################################################### DESCARGAR REELS DE INSTAGRAM
@@ -50,10 +49,9 @@ def downloadFiles(app, msg, path_download, userbot, url):
         sms = msg.reply("📥 **Descargando archivo...**")
         try:
             download(getmf(url), sms, app, out=path_download, bar=progresswget)
-            sms.edit_text("✅ **Descarga completa**")
         except Exception as x:
             sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
-        
+        return sms
 
 
 
@@ -65,12 +63,14 @@ def downloadFiles(app, msg, path_download, userbot, url):
         try:
             download(url, sms, app, out=path_download, bar=progresswget)  
             sms.edit_text("✅ **Descarga completa**")
-        except:
+        except Exception as e:
+            print(e)
+            sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{e}** ❌")
             try:
                 r = get(url, headers={"user-agent": generate_user_agent()})
                 with open(f"{path_download}/{basename(url)}", "wb") as f: 
                     f.write(r.content)
-                sms.edit_text("✅ **Descarga completa**")
+                return sms
             except Exception as x:
                 sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
 
@@ -90,11 +90,14 @@ def downloadFiles(app, msg, path_download, userbot, url):
                 msge = userbot.get_messages(int(chat), int(msg_id))
                 if msge.media:
                     start = time()
-                    file = userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
+                    userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
                     sms.edit_text("✅ **Descarga completa**")
             except ChannelInvalid:
-                try: sms.delete()
-                except: pass
+                try: 
+                    sms.delete()
+                except Exception as e:
+                    print(e) 
+                    
                 sms.edit_text("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
         else:
             try:
@@ -106,8 +109,10 @@ def downloadFiles(app, msg, path_download, userbot, url):
                     userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
                     sms.edit_text("✅ **Descarga completa**")
             except ChannelInvalid:
-                try: sms.delete()
-                except: pass
+                try: 
+                    sms.delete()
+                except Exception as e: 
+                    print(e)
                 sms.edit_text("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
 
         

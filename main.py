@@ -46,7 +46,7 @@ def borrarTodo(app, callback):
     path_downloads = join('downloads', callback.from_user.username)
     c = 0
     for c, i in enumerate(listdir(path_downloads)):
-        c+1
+        c+=1
         unlink(join(path_downloads, i))
     callback.message.reply(f'**✅ {c} Archivos eliminados**')
     
@@ -91,7 +91,8 @@ def descargar_archivos(app, msg):
     path_user = join('downloads', msg.from_user.username)
     if not exists(path_user): 
         makedirs(path_user)
-    downloadFiles(app, msg, path_user, bot.user_bot, msg.text)
+    sms = downloadFiles(app, msg, path_user, bot.user_bot, msg.text)
+    sms.edit_text("✅ **Descarga completa**")
 
 # ================================================ DESCARGAR ARCHIVOS EN CANALES
 @bot.app.on_message(filters.group & filters.command('dl'))
@@ -102,7 +103,8 @@ def descargarArchivosEnGrupos(app, msg):
     if not exists(path): 
         makedirs(path)
     
-    downloadFiles(app, msg, path, bot.user_bot, msg.text.split(' ')[1])
+    sms = downloadFiles(app, msg, path, bot.user_bot, msg.text.split(' ')[1])
+    sms.delete()
 
     for i in listdir(path):
         file = join('temp', username, i)
@@ -111,7 +113,7 @@ def descargarArchivosEnGrupos(app, msg):
         sleep(1)
 
 # ------------------------------------------------------------------------- OPCIONES DEL ARCHIVO ⚙️
-@bot.app.on_message(filters.regex("/op_"))
+@bot.app.on_message(filters.regex("/op_") & filters.private)
 def opcionesArchivo(app, msg):
     file = userFiles[msg.from_user.username][int(msg.text.split('_')[-1])]
     url = f"https://{bot.NAME_APP}.onrender.com/file/{msg.from_user.username}/{file}".replace(' ', '%20')
@@ -139,7 +141,7 @@ def renombrarArchivo(app, callback):
                           reply_markup=ForceReply(placeholder='Nuevo nombre'))
 
 
-@bot.app.on_message(filters.reply & filters.create(lambda f, c, u: u.reply_to_message.text.startswith('📝 Introduce el nuevo nombre para:')))
+@bot.app.on_message(filters.reply & filters.private & filters.create(lambda f, c, u: u.reply_to_message.text.startswith('📝 Introduce el nuevo nombre para:')))
 def cambiarNombre(app, msg):
     user = msg.from_user.username
     path_downloads = join('downloads', user)
