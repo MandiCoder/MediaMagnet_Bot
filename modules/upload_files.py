@@ -27,7 +27,7 @@ def uploadFile(app, msg, file, username):
         else:
             app.send_chat_action(chat_id, enums.ChatAction.UPLOAD_DOCUMENT)
             app.send_document(chat_id, file, progress=progressupl, progress_args=(sms, 1, 1, start), 
-                              reply_to_message_id=msg.id)
+                              reply_to_message_id=msg.id, thumb='./assets/thumb.jpeg')
         sms.delete()
 
         

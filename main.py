@@ -1,12 +1,14 @@
 # MIS MODULOS
-from time import sleep
 from modules.download_files_telegram import download_files_telegram
 from modules.pyrogram_init import PyrogramInit
 from modules.show_files import showFiles
-from modules.global_variables import btn_general, btn_opciones, userFiles, download_queues
+from modules.global_variables import btn_general, btn_opciones, userFiles, download_queues, access_bot
 from modules.download_files import downloadFiles
 from modules.upload_files import uploadFile
 from modules.database import create_db, update_db, read_db
+from modules.generate_words import generateWord
+from modules.auto_upload import autoUpload
+
 # MODULOS EXTERNOS
 from pyrogram import filters
 from pyrogram.types import (InlineKeyboardButton, InlineKeyboardMarkup, ForceReply)
@@ -84,33 +86,24 @@ def cambiarPesoZips(app, msg):
 # ---------------------------------------------------------------------- DESCARGAR ARCHIVOS Y VIDEOS
 @bot.app.on_message(filters.regex('http') & filters.private)
 def descargar_archivos(app, msg):
-    if not msg.from_user.username == 'MandiCoder':
-        msg.reply('Este bot solo lo puede usar su creador @MandiCoder 😛')
-        return
-    
-    path_user = join('downloads', msg.from_user.username)
-    if not exists(path_user): 
-        makedirs(path_user)
-    sms = downloadFiles(app, msg, path_user, bot.user_bot, msg.text)
-    sms.edit_text("✅ **Descarga completa**")
+    if msg.from_user.username not in access_bot:
+        path_download = join('temp', msg.from_user.username, generateWord(5))
+        autoUpload(app, msg, path_download, bot.user_bot, msg.text)  
+    else:
+        path_user = join('downloads', msg.from_user.username)
+        if not exists(path_user): 
+            makedirs(path_user)
+        sms = downloadFiles(app, msg, path_user, bot.user_bot, msg.text)
+        sms.edit_text("✅ **Descarga completa**")
 
 # ================================================ DESCARGAR ARCHIVOS EN CANALES
 @bot.app.on_message(filters.group & filters.command('dl'))
 def descargarArchivosEnGrupos(app, msg):
     username = msg.from_user.username
-    path = join('temp', username)
+    path_download = join('temp', username, generateWord(5))
     create_db(username)
-    if not exists(path): 
-        makedirs(path)
-    
-    sms = downloadFiles(app, msg, path, bot.user_bot, msg.text.split(' ')[1])
-    sms.delete()
+    autoUpload(app, msg, path_download, bot.user_bot, msg.text.split(' ')[1])
 
-    for i in listdir(path):
-        file = join('temp', username, i)
-        uploadFile(app, msg, file, username)
-        unlink(file)
-        sleep(1)
 
 # ------------------------------------------------------------------------- OPCIONES DEL ARCHIVO ⚙️
 @bot.app.on_message(filters.regex("/op_") & filters.private)
@@ -118,16 +111,25 @@ def opcionesArchivo(app, msg):
     file = userFiles[msg.from_user.username][int(msg.text.split('_')[-1])]
     url = f"https://{bot.NAME_APP}.onrender.com/file/{msg.from_user.username}/{file}".replace(' ', '%20')
     # http://127.0.0.1:8000/file/KOD_16/
-    
     btn = InlineKeyboardMarkup([
+        [InlineKeyboardButton('⬆️ SUBIR ARCHIVO', callback_data=f'upload {msg.text.split("_")[-1]}')],
+        [InlineKeyboardButton('📝 CAMBIAR NOMBRE', callback_data=f'rename {msg.text.split("_")[-1]}')],
+        [InlineKeyboardButton('🚮 ELIMINAR ARCHIVO', callback_data=f'del_file {msg.text.split("_")[-1]}')],
+        [InlineKeyboardButton('🌄 AGREGAR IMAGEN', callback_data=f'add_thumb {msg.text.split("_")[-1]}')],
+    ])
+    btn_url = InlineKeyboardMarkup([
         [InlineKeyboardButton('⬆️ SUBIR ARCHIVO', callback_data=f'upload {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('📝 CAMBIAR NOMBRE', callback_data=f'rename {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('🚮 ELIMINAR ARCHIVO', callback_data=f'del_file {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('🌄 AGREGAR IMAGEN', callback_data=f'add_thumb {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('🔗 ENLACE', url=url)],
     ])
-    msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=btn)
-
+    
+    try:
+        msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=btn_url)
+    except Exception as e:
+        print(e)
+        msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=btn)
 
 
 
