@@ -12,3 +12,7 @@ btn_general = ReplyKeyboardMarkup([
 btn_opciones = InlineKeyboardMarkup([
         [InlineKeyboardButton('📚 ZIP SIZE', callback_data='zip_size')]
     ])
+
+access_bot = (
+    'MandiCoder'
+)
