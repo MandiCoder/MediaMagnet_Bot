@@ -7,6 +7,7 @@ from time import sleep
 
 def autoUpload(app, msg, path_download, userbot, url):
     makedirs(path_download)
+    
     sms = downloadFiles(app, msg, path_download, userbot, url)
     sms.delete()
     

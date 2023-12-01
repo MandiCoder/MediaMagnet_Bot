@@ -29,6 +29,7 @@ def downloadFiles(app, msg, path_download, userbot, url):
                 
             return sms
         except Exception as x:
+            print(x)
             msg.reply(x)
         
         
@@ -49,11 +50,10 @@ def downloadFiles(app, msg, path_download, userbot, url):
         sms = msg.reply("📥 **Descargando archivo...**")
         try:
             download(getmf(url), sms, app, out=path_download, bar=progresswget)
+            return sms
         except Exception as x:
+            print(x)
             sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
-        return sms
-
-
 
 
     
@@ -71,8 +71,9 @@ def downloadFiles(app, msg, path_download, userbot, url):
                 with open(f"{path_download}/{basename(url)}", "wb") as f: 
                     f.write(r.content)
                 return sms
-            except Exception as x:
-                sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
+            except Exception as e:
+                print(e)
+                sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{e}** ❌")
 
 
 
@@ -91,7 +92,7 @@ def downloadFiles(app, msg, path_download, userbot, url):
                 if msge.media:
                     start = time()
                     userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
-                    sms.edit_text("✅ **Descarga completa**")
+                    return sms
             except ChannelInvalid:
                 try: 
                     sms.delete()
@@ -107,7 +108,7 @@ def downloadFiles(app, msg, path_download, userbot, url):
                 if msge.media:
                     start = time()
                     userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
-                    sms.edit_text("✅ **Descarga completa**")
+                    return sms
             except ChannelInvalid:
                 try: 
                     sms.delete()

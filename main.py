@@ -83,21 +83,23 @@ def cambiarPesoZips(app, msg):
     else:
         msg.reply('**❌ ERROR: Debe introducir un numero**', reply_markup=btn_general)
     
-# ---------------------------------------------------------------------- DESCARGAR ARCHIVOS Y VIDEOS
-@bot.app.on_message(filters.regex('http') & filters.private)
+# ---------------------------------------------------------------------- DESCARGAR DE ENLACES
+@bot.app.on_message(filters.create(lambda f, c, u: u.text.startswith('http')) & filters.private)
 def descargar_archivos(app, msg):
-    if msg.from_user.username not in access_bot:
-        path_download = join('temp', msg.from_user.username, generateWord(5))
+    username = msg.from_user.username
+    if username not in access_bot:
+        path_download = join('temp', username, generateWord(5))
         autoUpload(app, msg, path_download, bot.user_bot, msg.text)  
     else:
-        path_user = join('downloads', msg.from_user.username)
+        path_user = join('downloads', username)
         if not exists(path_user): 
             makedirs(path_user)
+    
         sms = downloadFiles(app, msg, path_user, bot.user_bot, msg.text)
         sms.edit_text("✅ **Descarga completa**")
 
 # ================================================ DESCARGAR ARCHIVOS EN CANALES
-@bot.app.on_message(filters.group & filters.command('dl'))
+@bot.app.on_message(filters.command('dl'))
 def descargarArchivosEnGrupos(app, msg):
     username = msg.from_user.username
     path_download = join('temp', username, generateWord(5))

@@ -5,6 +5,7 @@ def create_db(username:str):
     data = {
         'username'  :   username,
         'zip_size' :   2000,
+        'auto_upload' : True,
     }
     
     if not exists(join('db', f'{username}.json')):
