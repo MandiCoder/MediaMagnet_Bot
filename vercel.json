@@ -1,0 +1,8 @@
+{
+    "functions": {
+      "api/server": {
+        "runtime": "vercel-python@3.11"
+      }
+    }
+  }
+  

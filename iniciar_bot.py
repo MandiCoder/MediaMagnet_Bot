@@ -7,7 +7,7 @@ os.environ["BOT_TOKEN"] = '6393853527:AAGJp2_Yj_9sel4NC_rf0TzHuKxxVHjCPJs'
 os.environ["DATABASE"] = 'mongodb://127.0.0.1'
 os.environ["SESSION_STRING"] = ''
 os.environ["PORT"] = '8000'
-os.environ["BOT_USER"] = 'KOD_16'
+os.environ["BOT_USER"] = 'MandiCoder'
 os.environ["API_HASH"] = 'ff9d2b13d574fd0206a14bd3ceac7502'
 os.environ["API_ID"] = '23053083'
 

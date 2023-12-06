@@ -24,10 +24,10 @@ def enviar_mensajes(app, msg):
     create_db(msg.from_user.username)
 
     if not msg.from_user.username == 'MandiCoder':
-        msg.reply('Este bot solo lo puede usar su creador @MandiCoder 😛')
+        msg.reply('Hola, le doy la bienvenida a mi Bot')
         return
     else: 
-        msg.reply('Bienvenido a mi bot :v', reply_markup=btn_general)
+        msg.reply('**Ola perra**', reply_markup=btn_general)
     
 
     

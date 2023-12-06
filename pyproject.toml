@@ -15,6 +15,7 @@ user-agent = "^0.1.10"
 beautifulsoup4 = "^4.12.2"
 logzero = "^1.7.0"
 opencv-contrib-python-headless = "^4.8.1.78"
+gofile-dl = "^1.2.2"
 
 
 [build-system]
