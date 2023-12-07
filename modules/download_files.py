@@ -78,42 +78,42 @@ def downloadFiles(app, msg, path_download, userbot, url):
 
 
 
-    ###################################################### DESCARGAR ARCHIVOS DE CANALES REESTRINGIDOS
-    if url.startswith("https://t.me/"):
-        sms = msg.reply("📥 **Descargando archivo...**")
-        if url.endswith("?single"): 
-            url = url.replace("?single", "")
+    # ###################################################### DESCARGAR ARCHIVOS DE CANALES REESTRINGIDOS
+    # if url.startswith("https://t.me/"):
+    #     sms = msg.reply("📥 **Descargando archivo...**")
+    #     if url.endswith("?single"): 
+    #         url = url.replace("?single", "")
 
-        if url.startswith("https://t.me/c/"):
-            try:
-                chat = "-100" + url.split("/")[-2]
-                msg_id = url.split("/")[-1]
-                msge = userbot.get_messages(int(chat), int(msg_id))
-                if msge.media:
-                    start = time()
-                    userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
-                    return sms
-            except ChannelInvalid:
-                try: 
-                    sms.delete()
-                except Exception as e:
-                    print(e) 
+    #     if url.startswith("https://t.me/c/"):
+    #         try:
+    #             chat = "-100" + url.split("/")[-2]
+    #             msg_id = url.split("/")[-1]
+    #             msge = userbot.get_messages(int(chat), int(msg_id))
+    #             if msge.media:
+    #                 start = time()
+    #                 userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
+    #                 return sms
+    #         except ChannelInvalid:
+    #             try: 
+    #                 sms.delete()
+    #             except Exception as e:
+    #                 print(e) 
                     
-                sms.edit_text("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
-        else:
-            try:
-                chat = url.split("/")[-2]
-                msg_id = url.split("/")[-1]
-                msge = userbot.get_messages(chat, int(msg_id))
-                if msge.media:
-                    start = time()
-                    userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
-                    return sms
-            except ChannelInvalid:
-                try: 
-                    sms.delete()
-                except Exception as e: 
-                    print(e)
-                sms.edit_text("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
+    #             sms.edit_text("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
+    #     else:
+    #         try:
+    #             chat = url.split("/")[-2]
+    #             msg_id = url.split("/")[-1]
+    #             msge = userbot.get_messages(chat, int(msg_id))
+    #             if msge.media:
+    #                 start = time()
+    #                 userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
+    #                 return sms
+    #         except ChannelInvalid:
+    #             try: 
+    #                 sms.delete()
+    #             except Exception as e: 
+    #                 print(e)
+    #             sms.edit_text("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
 
         
