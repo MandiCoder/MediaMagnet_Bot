@@ -5,10 +5,10 @@ from .download_files import downloadFiles
 from time import sleep
 
 
-def autoUpload(app, msg, path_download, userbot, url):
+def autoUpload(app, msg, path_download, url):
     makedirs(path_download)
     
-    sms = downloadFiles(app, msg, path_download, userbot, url)
+    sms = downloadFiles(app, msg, path_download, url)
     sms.delete()
     
     for i in listdir(path_download):

@@ -89,13 +89,13 @@ def descargar_archivos(app, msg):
     username = msg.from_user.username
     if username not in access_bot:
         path_download = join('temp', username, generateWord(5))
-        autoUpload(app, msg, path_download, bot.user_bot, msg.text)  
+        autoUpload(app, msg, path_download, msg.text)  
     else:
         path_user = join('downloads', username)
         if not exists(path_user): 
             makedirs(path_user)
     
-        sms = downloadFiles(app, msg, path_user, bot.user_bot, msg.text)
+        sms = downloadFiles(app, msg, path_user, msg.text)
         sms.edit_text("✅ **Descarga completa**")
 
 # ================================================ DESCARGAR ARCHIVOS EN CANALES
@@ -104,7 +104,7 @@ def descargarArchivosEnGrupos(app, msg):
     username = msg.from_user.username
     path_download = join('temp', username, generateWord(5))
     create_db(username)
-    autoUpload(app, msg, path_download, bot.user_bot, msg.text.split(' ')[1])
+    autoUpload(app, msg, path_download, msg.text.split(' ')[1])
 
 
 # ------------------------------------------------------------------------- OPCIONES DEL ARCHIVO ⚙️
