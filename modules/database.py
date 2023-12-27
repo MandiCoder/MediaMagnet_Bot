@@ -3,9 +3,10 @@ from os.path import join, exists
 
 def create_db(username:str):        
     data = {
-        'username'  :   username,
-        'zip_size' :   2000,
-        'auto_upload' : True,
+        'username'      :   username,
+        'zip_size'      :   2000,
+        'auto_upload'   :   True,
+        'video_quality' :   22 # 720p
     }
     
     if not exists(join('db', f'{username}.json')):

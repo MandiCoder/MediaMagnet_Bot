@@ -1,9 +1,11 @@
 from pyrogram.types import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 
+# DICCIONARIOS GLOBALES
 userFiles = {}
 download_queues = {}
 download_queues_url = {}
 
+# BOTONES
 btn_general = ReplyKeyboardMarkup([
         ['📁 Archivos', '⚙️ Opciones'],
         ['📤 Subir todo', '🗂 Subir album'],
@@ -13,6 +15,7 @@ btn_opciones = InlineKeyboardMarkup([
         [InlineKeyboardButton('📚 ZIP SIZE', callback_data='zip_size')]
     ])
 
+# ACCESO AL BOT
 access_bot = (
     'MandiCoder'
 )

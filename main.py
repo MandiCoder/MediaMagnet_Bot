@@ -2,18 +2,19 @@
 from modules.download_files_telegram import download_files_telegram
 from modules.pyrogram_init import PyrogramInit
 from modules.show_files import showFiles
-from modules.global_variables import btn_general, btn_opciones, userFiles, download_queues, access_bot
 from modules.download_files import downloadFiles
 from modules.upload_files import uploadFile
 from modules.database import create_db, update_db, read_db
 from modules.generate_words import generateWord
 from modules.auto_upload import autoUpload
+from modules.extract_images import extractImages
+from modules.global_variables import (btn_general, btn_opciones, userFiles, download_queues, download_queues_url, access_bot)
 
 # MODULOS EXTERNOS
 from pyrogram import filters
 from pyrogram.types import (InlineKeyboardButton, InlineKeyboardMarkup, ForceReply)
-from os.path import exists, join, basename
-from os import makedirs, unlink, rename, listdir
+from os.path import join, basename, splitext, exists
+from os import unlink, rename, listdir, makedirs
 from queue import Queue as cola
 
 
@@ -36,6 +37,7 @@ def enviar_mensajes(app, msg):
 # ------------------------------------------------------------------------- VER ARCHIVOS DESCARGADOS
 @bot.app.on_message(filters.regex('📁 Archivos'))
 def mostrar_archivos(app, msg):
+    msg.delete()
     showFiles(msg, msg.from_user.username)
 
 
@@ -59,7 +61,7 @@ def borrarTodo(app, callback):
 # ------------------------------------------------------------------------- OPCIONES GENERALES ⚙️
 @bot.app.on_message(filters.regex('⚙️ Opciones'))
 def mostrar_opciones(app, msg):
-    
+    msg.delete()
     text = f'Zip size: `{read_db(msg.from_user.username)["zip_size"]} MB`'
     msg.reply(f'**⚙️ Opciones:\n\n {text}**', reply_markup=btn_opciones)
 
@@ -84,19 +86,44 @@ def cambiarPesoZips(app, msg):
         msg.reply('**❌ ERROR: Debe introducir un numero**', reply_markup=btn_general)
     
 # ---------------------------------------------------------------------- DESCARGAR DE ENLACES
-@bot.app.on_message(filters.create(lambda f, c, u: u.text.startswith('http')) & filters.private)
-def descargar_archivos(app, msg):
+@bot.app.on_message(filters.text & filters.create(lambda f, c, u: u.text.startswith('http')) & filters.private)
+def descargar_archivos_url(app, msg):
     username = msg.from_user.username
+    
     if username not in access_bot:
         path_download = join('temp', username, generateWord(5))
-        autoUpload(app, msg, path_download, msg.text)  
+        autoUpload(app, msg, path_download, msg.text) 
+        
     else:
         path_user = join('downloads', username)
         if not exists(path_user): 
             makedirs(path_user)
-    
-        sms = downloadFiles(app, msg, path_user, msg.text)
-        sms.edit_text("✅ **Descarga completa**")
+        file_info = (app, msg.chat.id, msg.text, path_user)
+        msg.reply("📌 __Enlace añadido a la cola__", quote=True)
+        
+        if username in download_queues_url:
+            download_queues_url[username].put(file_info)
+            
+        else:
+            queue = cola()
+            queue.put(file_info)
+            download_queues_url[username] = queue
+            descargar_archivos(username)
+
+
+def descargar_archivos(username):
+    queue = download_queues_url[username]
+
+    while not queue.empty():
+        app, message_id, url, path_user = queue.get()
+        try:
+            sms = downloadFiles(app, message_id, url, path_user, read_db(username)['video_quality'])
+            sms.edit_text("✅ **Descarga completa**")
+        except Exception as x:
+            app.send_message(message_id, x)
+        queue.task_done()
+
+    del download_queues_url[username]
 
 # ================================================ DESCARGAR ARCHIVOS EN CANALES
 @bot.app.on_message(filters.command('dl'))
@@ -113,25 +140,28 @@ def opcionesArchivo(app, msg):
     file = userFiles[msg.from_user.username][int(msg.text.split('_')[-1])]
     url = f"https://{bot.NAME_APP}.onrender.com/file/{msg.from_user.username}/{file}".replace(' ', '%20')
     # http://127.0.0.1:8000/file/KOD_16/
-    btn = InlineKeyboardMarkup([
-        [InlineKeyboardButton('⬆️ SUBIR ARCHIVO', callback_data=f'upload {msg.text.split("_")[-1]}')],
-        [InlineKeyboardButton('📝 CAMBIAR NOMBRE', callback_data=f'rename {msg.text.split("_")[-1]}')],
-        [InlineKeyboardButton('🚮 ELIMINAR ARCHIVO', callback_data=f'del_file {msg.text.split("_")[-1]}')],
-        [InlineKeyboardButton('🌄 AGREGAR IMAGEN', callback_data=f'add_thumb {msg.text.split("_")[-1]}')],
-    ])
-    btn_url = InlineKeyboardMarkup([
+    if bot.NAME_APP is not None:
+        url = f"https://{bot.NAME_APP}.onrender.com/file/{msg.from_user.username}/{file}".replace(' ', '%20')
+    else:
+        url = f"http://127.0.0.1:8000/file/{file}".replace(' ', '%20')
+
+    lista_botones = [
         [InlineKeyboardButton('⬆️ SUBIR ARCHIVO', callback_data=f'upload {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('📝 CAMBIAR NOMBRE', callback_data=f'rename {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('🚮 ELIMINAR ARCHIVO', callback_data=f'del_file {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('🌄 AGREGAR IMAGEN', callback_data=f'add_thumb {msg.text.split("_")[-1]}')],
         [InlineKeyboardButton('🔗 ENLACE', url=url)],
-    ])
+    ]
+    
+    if splitext(file)[1] in ('.mp4', 'mkv'):
+        lista_botones.insert(2, [InlineKeyboardButton('🗂 EXTRAER IMAGENES', callback_data=f'extract_img {msg.text.split("_")[-1]}')])
     
     try:
-        msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=btn_url)
+        msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(lista_botones))
     except Exception as e:
         print(e)
-        msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=btn)
+        del lista_botones[-1]
+        msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(lista_botones))
 
 
 
@@ -164,13 +194,28 @@ def cambiarNombre(app, msg):
 def subirArchivo(app, callback):
     file = userFiles[callback.from_user.username][int(callback.data.split(' ')[-1])]
     callback.message.delete()
-   
-    
     uploadFile(app, callback.message, file, callback.from_user.username)
 
 
 
 
+
+
+
+
+# ----------------------------------------------------------------------- EXTRAER IMAGENES 🗂
+@bot.app.on_callback_query(filters.create(lambda f, c, u: "extract_img" in u.data))
+def extraerImagenes(app, callback):
+    user = callback.from_user.username
+    file = userFiles[user][int(callback.data.split(' ')[-1])]
+    extractImages(join('downloads', user, file), user)
+    
+    
+    
+    
+    
+    
+    
 
 # ---------------------------------------------------------------------- ELIMINAR UN ARCHIVO 🚮
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "del_file" in u.data))
