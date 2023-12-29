@@ -11,6 +11,7 @@ from modules.extract_images import extractImages
 from modules.global_variables import (btn_general, btn_opciones, userFiles, download_queues, download_queues_url, access_bot)
 
 # MODULOS EXTERNOS
+from pickle import dump, load
 from pyrogram import filters
 from pyrogram.types import (InlineKeyboardButton, InlineKeyboardMarkup, ForceReply)
 from os.path import join, basename, splitext, exists
@@ -37,9 +38,22 @@ def enviar_mensajes(app, msg):
 # ------------------------------------------------------------------------- VER ARCHIVOS DESCARGADOS
 @bot.app.on_message(filters.regex('📁 Archivos'))
 def mostrar_archivos(app, msg):
-    msg.delete()
-    showFiles(msg, msg.from_user.username)
-
+    username = msg.from_user.username
+    file_path = join('archive', username, 'message.pkl')
+    folder_path = join('archive', username)
+    
+    if not exists(folder_path):
+        makedirs(folder_path)
+        
+    if exists(file_path):
+        eliminarMensaje(username, msg.id)
+    else:    
+        msg.delete()
+        
+    sms = showFiles(msg, msg.from_user.username)
+    
+    with open(join(file_path), 'wb') as pk:
+        dump(sms, pk)
 
 
 
@@ -61,9 +75,11 @@ def borrarTodo(app, callback):
 # ------------------------------------------------------------------------- OPCIONES GENERALES ⚙️
 @bot.app.on_message(filters.regex('⚙️ Opciones'))
 def mostrar_opciones(app, msg):
-    msg.delete()
-    text = f'Zip size: `{read_db(msg.from_user.username)["zip_size"]} MB`'
-    msg.reply(f'**⚙️ Opciones:\n\n {text}**', reply_markup=btn_opciones)
+    username = msg.from_user.username
+    eliminarMensaje(username, msg.id)
+    text = f'Zip size: `{read_db(username)["zip_size"]} MB`'
+    sms = msg.reply(f'**⚙️ Opciones:\n\n {text}**', reply_markup=btn_opciones)
+    guardarMensaje(username, sms)
 
 
 # -------------------------------------------------- ZIP SIZE
@@ -84,6 +100,8 @@ def cambiarPesoZips(app, msg):
             msg.reply('**❌ ERROR: Debe introducir un numero --mayor-- que 10 y --menor-- que 2000**', reply_markup=btn_general)
     else:
         msg.reply('**❌ ERROR: Debe introducir un numero**', reply_markup=btn_general)
+    
+    
     
 # ---------------------------------------------------------------------- DESCARGAR DE ENLACES
 @bot.app.on_message(filters.text & filters.create(lambda f, c, u: u.text.startswith('http')) & filters.private)
@@ -137,11 +155,13 @@ def descargarArchivosEnGrupos(app, msg):
 # ------------------------------------------------------------------------- OPCIONES DEL ARCHIVO ⚙️
 @bot.app.on_message(filters.regex("/op_") & filters.private)
 def opcionesArchivo(app, msg):
-    file = userFiles[msg.from_user.username][int(msg.text.split('_')[-1])]
-    url = f"https://{bot.NAME_APP}.onrender.com/file/{msg.from_user.username}/{file}".replace(' ', '%20')
+    username = msg.from_user.username
+    file = userFiles[username][int(msg.text.split('_')[-1])]
+    url = f"https://{bot.NAME_APP}.onrender.com/file/{username}/{file}".replace(' ', '%20')
     # http://127.0.0.1:8000/file/KOD_16/
+    
     if bot.NAME_APP is not None:
-        url = f"https://{bot.NAME_APP}.onrender.com/file/{msg.from_user.username}/{file}".replace(' ', '%20')
+        url = f"https://{bot.NAME_APP}.onrender.com/file/{username}/{file}".replace(' ', '%20')
     else:
         url = f"http://127.0.0.1:8000/file/{file}".replace(' ', '%20')
 
@@ -156,12 +176,15 @@ def opcionesArchivo(app, msg):
     if splitext(file)[1] in ('.mp4', 'mkv'):
         lista_botones.insert(2, [InlineKeyboardButton('🗂 EXTRAER IMAGENES', callback_data=f'extract_img {msg.text.split("_")[-1]}')])
     
+    eliminarMensaje(username, msg.id)
+    
     try:
         msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(lista_botones))
     except Exception as e:
         print(e)
         del lista_botones[-1]
         msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(lista_botones))
+
 
 
 
@@ -177,16 +200,15 @@ def renombrarArchivo(app, callback):
 
 @bot.app.on_message(filters.reply & filters.private & filters.create(lambda f, c, u: u.reply_to_message.text.startswith('📝 Introduce el nuevo nombre para:')))
 def cambiarNombre(app, msg):
-    user = msg.from_user.username
-    path_downloads = join('downloads', user)
+    username = msg.from_user.username
+    path_downloads = join('downloads', username)
     
     rename(join(path_downloads, msg.reply_to_message.text.split(': ')[-1]), 
            join(path_downloads, msg.text))
     
     msg.reply(f'**✅ Nombre cambiado a: `{msg.text}`**')
-    showFiles(msg, msg.from_user.username)
-
-
+    sms = showFiles(msg, username)
+    guardarMensaje(username, sms)
 
 
 # ------------------------------------------------------------------------- SUBIR UN ARCHIVO ⬆️
@@ -201,6 +223,21 @@ def subirArchivo(app, callback):
 
 
 
+# ------------------------------------------------------------------------- SUBIR TODO 📤
+@bot.app.on_message(filters.regex('📤 Subir todo') & filters.private)
+def subirTodo(app, msg):
+    username = msg.from_user.username
+    eliminarMensaje(username, msg.id)
+    path_downloads = join('downloads', username)
+    msg.delete()
+    sms = msg.reply(f'**📤 Subiendo {len(listdir(path_downloads))} Archivos**')
+
+    for file in listdir(path_downloads):
+        uploadFile(app, msg, join(path_downloads, file), username)
+    sms.delete()
+
+
+
 
 
 # ----------------------------------------------------------------------- EXTRAER IMAGENES 🗂
@@ -209,22 +246,20 @@ def extraerImagenes(app, callback):
     user = callback.from_user.username
     file = userFiles[user][int(callback.data.split(' ')[-1])]
     extractImages(join('downloads', user, file), user)
-    
-    
-    
-    
-    
+
     
     
 
 # ---------------------------------------------------------------------- ELIMINAR UN ARCHIVO 🚮
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "del_file" in u.data))
 def elimiarArchivo(app, callback):
-    file = userFiles[callback.from_user.username][int(callback.data.split(' ')[-1])]
+    username = callback.from_user.username
+    file = userFiles[username][int(callback.data.split(' ')[-1])]    
     unlink(file)
     callback.message.edit(f'✅ {basename(file)} eliminado')
-    showFiles(callback.message, callback.from_user.username)
-
+    
+    sms = showFiles(callback.message, username)
+    guardarMensaje(username, sms)
 
 
 
@@ -247,6 +282,19 @@ def descargarArchivosTelegram(app, message):
         download_files_telegram(app, username)
 
 
+# ---------------------------------------------------------- MANEJAR MENSAJES
+def eliminarMensaje(username:str, msg_id:int):
+    file_path = join('archive', username, 'message.pkl')
+    with open(file_path, 'rb') as pk:
+        sms_pk = load(pk)
+        bot.app.delete_messages(sms_pk.chat.id, (sms_pk.id, msg_id))
+
+
+def guardarMensaje(username:str, sms:object):
+    file_path = join('archive', username, 'message.pkl')
+    
+    with open(join(file_path), 'wb') as pk:
+        dump(sms, pk)
 
 if __name__ == '__main__':
     bot.iniciar_bot()

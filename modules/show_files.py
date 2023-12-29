@@ -33,7 +33,8 @@ def showFiles(msg, usr):
             
         userFiles[usr] = file_list
         
-    msg.reply(list_files, reply_markup=btn)    
+    sms = msg.reply(list_files, reply_markup=btn)
+    return sms
 
 
 def cleanString(string:str) -> str:
