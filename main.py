@@ -18,7 +18,6 @@ from os.path import join, basename, splitext, exists
 from os import unlink, rename, listdir, makedirs
 from queue import Queue as cola
 
-
 bot = PyrogramInit()
 
 @bot.app.on_message(filters.command('start'))

@@ -1,9 +1,9 @@
 import yt_dlp
-from modules.wget import download
 from .progres_bar import  progresswget, progressytdl
 from .mediafire import get as getmf
 from .youtubedl_mod import YoutubeDL
-# from time import time
+from .google_drive import downloadgd
+from modules.wget import download
 from os.path import join, basename
 from user_agent import generate_user_agent
 from requests import get
@@ -31,7 +31,7 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
             return sms
         except Exception as x:
             print(x)
-            app.send_message(chat_id, x)
+            sms.reply(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
             
         return sms
         
@@ -53,29 +53,46 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
         app.send_message(chat_id, url.replace('instagram', 'ddinstagram'), disable_web_page_preview=False)
         
         
+    
         
-        
+    ###################################################### DESCARGAR ARCHIVOS DE GOOGLE DRIVE
+    elif "drive.google.com" in url:
+        sms = app.send_message(chat_id, "🚚 **Descargando archivo de Google Drive...**")
+        try:
+            
+            downloadgd(url, path_download)
+            return sms
+        except Exception as x:
+            print(x)
+            sms.reply(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
+
+        return sms
+    
+    
+    
+    
+    
     ###################################################### DESCARGAR ARCHIVOS DE MEDIAFIRE
     elif "mediafire" in url:
-        sms = app.send_message(chat_id, "📥 **Descargando archivo...**")
+        sms = app.send_message(chat_id, "🚚 **Descargando archivo de MediaFire...**")
         try:
             download(getmf(url), sms, app, out=path_download, bar=progresswget)
             return sms
         except Exception as x:
             print(x)
-            sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
+            sms.reply(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
 
         return sms
     
     ###################################################### DESCARGAR ARCHIVOS DE ENLACE DIRECTO
     elif url.startswith("http") and "t.me/" not in url:
-        sms = app.send_message(chat_id, "📥 **Descargando archivo...**")
+        sms = app.send_message(chat_id, "🚚 **Descargando archivo...**")
         try:
             download(url, sms, app, out=path_download, bar=progresswget)  
             
         except Exception as e:
             print(e)
-            sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{e}** ❌")
+            sms.reply(f"❌ **No se pudo descargar el archivo: \n{e}** ❌")
             try:
                 r = get(url, headers={"user-agent": generate_user_agent()})
                 with open(f"{path_download}/{basename(url)}", "wb") as f: 
@@ -83,7 +100,7 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
                 return sms
             except Exception as e:
                 print(e)
-                sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{e}** ❌")
+                sms.reply(f"❌ **No se pudo descargar el archivo: \n{e}** ❌")
                 
         return sms
 
@@ -110,7 +127,7 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
     #             except Exception as e:
     #                 print(e) 
                     
-    #             sms.edit_text("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
+    #             sms.reply("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
     #     else:
     #         try:
     #             chat = url.split("/")[-2]
@@ -125,6 +142,6 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
     #                 sms.delete()
     #             except Exception as e: 
     #                 print(e)
-    #             sms.edit_text("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
+    #             sms.reply("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
 
         

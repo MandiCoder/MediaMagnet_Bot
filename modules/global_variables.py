@@ -1,4 +1,5 @@
 from pyrogram.types import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+from .google_drive import login
 
 # DICCIONARIOS GLOBALES
 userFiles = {}
@@ -19,3 +20,5 @@ btn_opciones = InlineKeyboardMarkup([
 access_bot = (
     'MandiCoder'
 )
+
+drive = login()
