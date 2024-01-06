@@ -1,5 +1,4 @@
 from pyrogram.types import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
-from .google_drive import login
 
 # DICCIONARIOS GLOBALES
 userFiles = {}
@@ -9,7 +8,7 @@ download_queues_url = {}
 # BOTONES
 btn_general = ReplyKeyboardMarkup([
         ['📁 Archivos', '⚙️ Opciones'],
-        ['📤 Subir todo', '🗂 Subir album'],
+        ['📤 Subir todo', '📦 Comprimir todo'],
     ], resize_keyboard=True, one_time_keyboard=True)
 
 btn_opciones = InlineKeyboardMarkup([
@@ -21,4 +20,3 @@ access_bot = (
     'MandiCoder'
 )
 
-drive = login()

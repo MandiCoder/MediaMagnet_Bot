@@ -35,10 +35,6 @@ class Downloader:
         print(f'Start downloading {self.name}')
         while not self._status.is_seeding:
             s = self.status()
-
-            # print('\r%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d) %s' % (
-            #     s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
-            #     s.num_peers, s.state), end=' ')
             
             if self._second != localtime().tm_sec:
                 try:
@@ -49,9 +45,7 @@ class Downloader:
                     pass
                 self._second = localtime().tm_sec
 
-            # sys.stdout.flush()
-            # time.sleep(1)
-
+        sms.edit_text("✅ **Descarga completa**")
         print(self._status.name, 'downloaded successfully.')
 
     def __str__(self):

@@ -29,7 +29,7 @@ proceso = Popen(comando)
 
 observer = Observer()
 observer.schedule(eventHandler(proceso), "./main.py", recursive=False)
-observer.schedule(eventHandler(proceso), "./modules", recursive=True)
+# observer.schedule(eventHandler(proceso), "./modules", recursive=True)
 observer.start()
 
 try:

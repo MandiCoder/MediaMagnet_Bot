@@ -10,14 +10,16 @@ from modules.auto_upload import autoUpload
 from modules.extract_images import extractImages
 from modules.global_variables import (btn_general, btn_opciones, userFiles, download_queues, download_queues_url, access_bot)
 from modules.torrentp.torrent_downloader import TorrentDownloader
+from modules.compress_files import compressFiles
 
 # MODULOS EXTERNOS
 from pickle import dump, load
 from pyrogram import filters
 from pyrogram.types import (InlineKeyboardButton, InlineKeyboardMarkup, ForceReply)
-from os.path import join, basename, splitext, exists
+from os.path import join, basename, splitext, exists, isfile, isdir
 from os import unlink, rename, listdir, makedirs
 from queue import Queue as cola
+from shutil import rmtree
 
 bot = PyrogramInit()
 
@@ -65,12 +67,42 @@ def borrarTodo(app, callback):
     c = 0
     for c, i in enumerate(listdir(path_downloads)):
         c+=1
-        unlink(join(path_downloads, i))
+        path = join(path_downloads, i)
+        if isdir(path):
+            rmtree(path)
+        else:
+            unlink(path)
+    callback.message.delete()
     callback.message.reply(f'**✅ {c} Archivos eliminados**')
     
     
     
     
+
+# ------------------------------------------------------------------------- COMPRIMIR ARCHIVOS 📦
+@bot.app.on_message(filters.regex('📦 Comprimir todo'))
+def enviar_mensaje_comprimir(app, msg):
+    eliminarMensaje(msg.from_user.username, msg.id)
+    text = "**📝 Ingrese el nombre del archivo: \n🔐 Debajo una contraseña (Opcional)**"
+    text += "**\n\nEjemplo: `\n    MiArchivoZip\n    MiContraseña`**"
+    msg.reply(text, reply_markup=ForceReply(placeholder="Nombre del archivo:"))
+    
+@bot.app.on_message(filters.reply & filters.create(lambda f, c, u: u.reply_to_message.text.startswith('📝 Ingrese el nombre del archivo:')))
+def recibir_mensaje_comprimir(app, msg):
+    bot.app.delete_messages(msg.chat.id, (msg.id, msg.reply_to_message.id))
+    username = msg.from_user.username
+    user_path = join('downloads', username)
+    list_files = []
+    
+    for i in listdir(user_path):
+        full_path = join(user_path, i)
+        if isfile(full_path):
+            list_files.append(full_path)
+    
+    compressFiles(app, msg, list_files, msg.text, user_path)
+    
+    
+
 
 # ------------------------------------------------------------------------- OPCIONES GENERALES ⚙️
 @bot.app.on_message(filters.regex('⚙️ Opciones'))
@@ -103,9 +135,8 @@ def cambiarPesoZips(app, msg):
     
 
 # ---------------------------------------------------------------------- DESCARGAR DE ENLACES
-@bot.app.on_message(filters.text & 
-                    filters.create(lambda f, c, u: u.text.startswith('http')) |
-                    filters.create(lambda f, c, u: u.text.startswith('magnet:')) & 
+@bot.app.on_message(filters.text & filters.create(lambda f, c, u: u.text.startswith('http')) |
+                    filters.text & filters.create(lambda f, c, u: u.text.startswith('magnet:')) & 
                     filters.private)
 
 def descargar_archivos_url(app, msg):
@@ -177,10 +208,17 @@ def opcionesArchivo(app, msg):
     
     if splitext(file)[1] in ('.mp4', 'mkv'):
         lista_botones.insert(2, [InlineKeyboardButton('🗂 EXTRAER IMAGENES', callback_data=f'extract_img {msg.text.split("_")[-1]}')])
+        
     elif file.endswith(".torrent"):
         lista_botones = [
             [InlineKeyboardButton('🏴‍☠️ DESCARGAR TORRENT', callback_data=f'torrentdl {msg.text.split("_")[-1]}')],
             [InlineKeyboardButton('🚮 ELIMINAR ARCHIVO', callback_data=f'del_file {msg.text.split("_")[-1]}')],
+        ]
+    elif isdir(file):
+        lista_botones = [
+            [InlineKeyboardButton('📦 COMPRIMIR CARPETA', callback_data=f'compress_folder {msg.text.split("_")[-1]}')],
+            [InlineKeyboardButton('📝 CAMBIAR NOMBRE', callback_data=f'rename {msg.text.split("_")[-1]}')],
+            [InlineKeyboardButton('🚮 ELIMINAR CARPETA', callback_data=f'del_file {msg.text.split("_")[-1]}')],
         ]
     
     eliminarMensaje(username, msg.id)
@@ -190,6 +228,25 @@ def opcionesArchivo(app, msg):
         print(e)
         del lista_botones[-1]
         msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(lista_botones))
+
+
+
+
+
+# ------------------------------------------------------------------------ COMPRIMIR CARPETA 📦
+@bot.app.on_callback_query(filters.create(lambda f, c, u: "compress_folder" in u.data))
+def comprimirCarpeta(app, callback):
+    username = callback.from_user.username
+    folder = userFiles[username][int(callback.data.split(' ')[-1])]
+    path_downloads = join('downloads', username)
+    list_files = set()
+    
+    for file in listdir(folder):
+        list_files.add(join(folder, file))
+    
+    callback.message.delete()
+    compressFiles(app, callback.message, list_files, basename(folder), path_downloads)
+
 
 
 
@@ -277,7 +334,11 @@ def extraerImagenes(app, callback):
 def elimiarArchivo(app, callback):
     username = callback.from_user.username
     file = userFiles[username][int(callback.data.split(' ')[-1])]    
-    unlink(file)
+    
+    if isfile(file):
+        unlink(file)
+    else:
+        rmtree(file)    
     callback.message.edit(f'✅ {basename(file)} eliminado')
     
     sms = showFiles(callback.message, username)

@@ -2,7 +2,7 @@ import yt_dlp
 from .progres_bar import  progresswget, progressytdl
 from .mediafire import get as getmf
 from .youtubedl_mod import YoutubeDL
-from .google_drive import downloadgd
+from classes.google_drive import googleDrive
 from modules.wget import download
 from os.path import join, basename
 from user_agent import generate_user_agent
@@ -41,11 +41,13 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
         
         
         elif "drive.google.com" in url: # ---------------------------------------- DESCARGAR ARCHIVOS DE GOOGLE DRIVE
-            downloadgd(url, path_download)
+            googleDrive(sms).download(url, path_download)
+
             
             
         elif "mediafire" in url: # ------------------------------------------------ DESCARGAR ARCHIVOS DE MEDIAFIRE
             download(getmf(url), sms, app, out=path_download, bar=progresswget)
+            
             
             
         elif url.startswith('magnet:'): # ----------------------------------------- DESCARGAR ARCHIVOS DE TORRENT
@@ -55,6 +57,8 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
         
         elif url.startswith("http") and "t.me/" not in url: # ----------------------------------------- DESCARGAR ARCHIVOS DE ENLACE DIRECTO
             download_http(app, sms, url, path_download)
+        
+        
         
         sms.edit_text("✅ **Descarga completa**")
     except Exception as x:
