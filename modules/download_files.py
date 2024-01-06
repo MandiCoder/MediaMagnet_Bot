@@ -7,6 +7,7 @@ from modules.wget import download
 from os.path import join, basename
 from user_agent import generate_user_agent
 from requests import get
+from .torrentp import TorrentDownloader
 # from pyrogram.errors import ChannelInvalid
 
 
@@ -16,93 +17,68 @@ from requests import get
 
 def downloadFiles(app, chat_id, url, path_download, video_quality):
     
-    ##################################################### DESCARGAR VIDEOS SHORTS DE YOUTUBE
-    if 'https://youtu' in url and 'short' in url:
-        try:
-            sms = app.send_message(chat_id, "🚚 **Descargando...**")
-            options = {
+    options = {
                 'format': 'best',
                 'outtmpl': join(path_download, '%(title)s.%(ext)s')    
             }
-            
-            with yt_dlp.YoutubeDL(options) as ydl: 
-                ydl.download([url]) 
-                
-            return sms
-        except Exception as x:
-            print(x)
-            sms.reply(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
-            
-        return sms
-        
-        
-    ###################################################### DESCARGAR VIDEOS DE YOUTUBE
-    if 'https://youtu' in url:
-        sms = app.send_message(chat_id, "**🚚 Descargando video**")
-        ytdl = YoutubeDL(progressytdl, sms, app, False)
-        ytdl.download(url, path_download, video_quality)
     
-        return sms
-    
-    
-    
-    ###################################################### DESCARGAR REELS DE INSTAGRAM
-    elif 'instagram.com' in url:
-        # https://www.instagram.com/reel/CzMSJ6Pxbte/?igshid=MTM5ZmplcXBiN2h5Nw==
-        # https://www.ddinstagram.com/reel/Cwdc8zRoPlJ/?igshid=NTc4MTIwNjQ2YQ==
-        app.send_message(chat_id, url.replace('instagram', 'ddinstagram'), disable_web_page_preview=False)
-        
-        
-    
-        
-    ###################################################### DESCARGAR ARCHIVOS DE GOOGLE DRIVE
-    elif "drive.google.com" in url:
-        sms = app.send_message(chat_id, "🚚 **Descargando archivo de Google Drive...**")
-        try:
-            
-            downloadgd(url, path_download)
-            return sms
-        except Exception as x:
-            print(x)
-            sms.reply(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
-
-        return sms
-    
-    
-    
-    
-    
-    ###################################################### DESCARGAR ARCHIVOS DE MEDIAFIRE
-    elif "mediafire" in url:
-        sms = app.send_message(chat_id, "🚚 **Descargando archivo de MediaFire...**")
-        try:
-            download(getmf(url), sms, app, out=path_download, bar=progresswget)
-            return sms
-        except Exception as x:
-            print(x)
-            sms.reply(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
-
-        return sms
-    
-    ###################################################### DESCARGAR ARCHIVOS DE ENLACE DIRECTO
-    elif url.startswith("http") and "t.me/" not in url:
+    try:
         sms = app.send_message(chat_id, "🚚 **Descargando archivo...**")
-        try:
-            download(url, sms, app, out=path_download, bar=progresswget)  
+
+        if 'https://youtu' in url and 'short' in url: # -------------------------- DESCARGAR VIDEOS SHORTS DE YOUTUBE
+            with yt_dlp.YoutubeDL(options) as ydl: 
+                    ydl.download([url])
+
+
+        elif 'https://youtu' in url: # ------------------------------------------- DESCARGAR VIDEOS DE YOUTUBE
+            ytdl = YoutubeDL(progressytdl, sms, app, False)
+            ytdl.download(url, path_download, video_quality)
             
-        except Exception as e:
-            print(e)
-            sms.reply(f"❌ **No se pudo descargar el archivo: \n{e}** ❌")
-            try:
-                r = get(url, headers={"user-agent": generate_user_agent()})
-                with open(f"{path_download}/{basename(url)}", "wb") as f: 
-                    f.write(r.content)
-                return sms
-            except Exception as e:
-                print(e)
-                sms.reply(f"❌ **No se pudo descargar el archivo: \n{e}** ❌")
-                
-        return sms
+            
+        elif 'instagram.com' in url: # ------------------------------------------- DESCARGAR REELS DE INSTAGRAM
+            app.send_message(chat_id, url.replace('instagram', 'ddinstagram'), disable_web_page_preview=False)
+            return
+        
+        
+        elif "drive.google.com" in url: # ---------------------------------------- DESCARGAR ARCHIVOS DE GOOGLE DRIVE
+            downloadgd(url, path_download)
+            
+            
+        elif "mediafire" in url: # ------------------------------------------------ DESCARGAR ARCHIVOS DE MEDIAFIRE
+            download(getmf(url), sms, app, out=path_download, bar=progresswget)
+            
+            
+        elif url.startswith('magnet:'): # ----------------------------------------- DESCARGAR ARCHIVOS DE TORRENT
+            torrent_file = TorrentDownloader(url, path_download, sms)
+            torrent_file.start_download()
+        
+        
+        elif url.startswith("http") and "t.me/" not in url: # ----------------------------------------- DESCARGAR ARCHIVOS DE ENLACE DIRECTO
+            download_http(app, sms, url, path_download)
+        
+        sms.edit_text("✅ **Descarga completa**")
+    except Exception as x:
+            print(x)
+            sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
+    
+
+
+
+
+def download_http(app, sms, url, path_download):
+    try:
+        download(url, sms, app, out=path_download, bar=progresswget)
+    except Exception as e:
+        print(e)
+        r = get(url, headers={"user-agent": generate_user_agent()})
+        with open(f"{path_download}/{basename(url)}", "wb") as f:
+            f.write(r.content)
+
+
+
+
+
+
 
 
 

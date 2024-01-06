@@ -9,6 +9,7 @@ from modules.generate_words import generateWord
 from modules.auto_upload import autoUpload
 from modules.extract_images import extractImages
 from modules.global_variables import (btn_general, btn_opciones, userFiles, download_queues, download_queues_url, access_bot)
+from modules.torrentp.torrent_downloader import TorrentDownloader
 
 # MODULOS EXTERNOS
 from pickle import dump, load
@@ -100,10 +101,13 @@ def cambiarPesoZips(app, msg):
     else:
         msg.reply('**❌ ERROR: Debe introducir un numero**', reply_markup=btn_general)
     
-    
-    
+
 # ---------------------------------------------------------------------- DESCARGAR DE ENLACES
-@bot.app.on_message(filters.text & filters.create(lambda f, c, u: u.text.startswith('http')) & filters.private)
+@bot.app.on_message(filters.text & 
+                    filters.create(lambda f, c, u: u.text.startswith('http')) |
+                    filters.create(lambda f, c, u: u.text.startswith('magnet:')) & 
+                    filters.private)
+
 def descargar_archivos_url(app, msg):
     username = msg.from_user.username
     
@@ -134,8 +138,7 @@ def descargar_archivos(username):
     while not queue.empty():
         app, message_id, url, path_user = queue.get()
         try:
-            sms = downloadFiles(app, message_id, url, path_user, read_db(username)['video_quality'])
-            sms.edit_text("✅ **Descarga completa**")
+            downloadFiles(app, message_id, url, path_user, read_db(username)['video_quality'])
         except Exception as x:
             app.send_message(message_id, x)
         queue.task_done()
@@ -174,9 +177,13 @@ def opcionesArchivo(app, msg):
     
     if splitext(file)[1] in ('.mp4', 'mkv'):
         lista_botones.insert(2, [InlineKeyboardButton('🗂 EXTRAER IMAGENES', callback_data=f'extract_img {msg.text.split("_")[-1]}')])
+    elif file.endswith(".torrent"):
+        lista_botones = [
+            [InlineKeyboardButton('🏴‍☠️ DESCARGAR TORRENT', callback_data=f'torrentdl {msg.text.split("_")[-1]}')],
+            [InlineKeyboardButton('🚮 ELIMINAR ARCHIVO', callback_data=f'del_file {msg.text.split("_")[-1]}')],
+        ]
     
     eliminarMensaje(username, msg.id)
-    
     try:
         msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(lista_botones))
     except Exception as e:
@@ -184,6 +191,22 @@ def opcionesArchivo(app, msg):
         del lista_botones[-1]
         msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(lista_botones))
 
+
+
+
+
+# ------------------------------------------------------------------------ DESCARGAR ARCHIVO TORRENT 🏴‍☠️
+@bot.app.on_callback_query(filters.create(lambda f, c, u: "torrentdl" in u.data))
+def descargarTorrent(app, callback):
+    username = callback.from_user.username
+    file = userFiles[username][int(callback.data.split(' ')[-1])]
+    path_downloads = join('downloads', username)
+    
+    callback.message.delete()
+    sms = callback.message.reply("**Descargando archivo torrent..**")
+      
+    torrent_file = TorrentDownloader(file, path_downloads, sms)
+    torrent_file.start_download()
 
 
 

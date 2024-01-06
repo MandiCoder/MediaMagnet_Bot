@@ -1,23 +1,23 @@
 [tool.poetry]
-name = "mediamagnet"
+name = "mediamagnetbot"
 version = "0.1.0"
 description = ""
-authors = ["Rey <baitycasper@gmail.com>"]
+authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-pyrogram = "^2.0.106"
-aiohttp = "^3.8.6"
-tgcrypto = "^1.2.5"
-yt-dlp = "^2023.10.13"
-user-agent = "^0.1.10"
-beautifulsoup4 = "^4.12.2"
-logzero = "^1.7.0"
-opencv-contrib-python-headless = "^4.8.1.78"
-gofile-dl = "^1.2.2"
-watchdog = "^3.0.0"
+python = "^3.10"
 pydrive2 = "^1.19.0"
+pyrogram = "^2.0.106"
+watchdog = "^3.0.0"
+yt-dlp = "^2023.12.30"
+aiohttp = "^3.9.1"
+opencv-contrib-python-headless = "^4.9.0.80"
+logzero = "^1.7.0"
+tgcrypto = "^1.2.5"
+user-agent = "^0.1.10"
+bs4 = "^0.0.1"
+torrentp = "^0.1.6"
 
 
 [build-system]
