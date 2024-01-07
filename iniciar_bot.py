@@ -1,8 +1,7 @@
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from modules.ansi import green, purple
+from modules.ansi import purple
 from subprocess import Popen
-from time import sleep
 from os import environ
 
 
@@ -20,16 +19,17 @@ class eventHandler(FileSystemEventHandler):
         self.proceso = proceso
     
     def on_modified(self, event):
-        print(purple("\nReiniciando Bot..."))
-        self.proceso.terminate()
-        self.proceso = Popen(comando)
+        if '__pycache__' not in event.src_path:
+            print(purple("\nReiniciando Bot..."))
+            self.proceso.terminate()
+            self.proceso = Popen(comando)
 
 comando = ['python3', 'main.py']
 proceso = Popen(comando)
 
 observer = Observer()
 observer.schedule(eventHandler(proceso), "./main.py", recursive=False)
-observer.schedule(eventHandler(proceso), "./modules", recursive=True)
+# observer.schedule(eventHandler(proceso), "./modules", recursive=True)
 observer.start()
 
 try:

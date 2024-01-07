@@ -21,16 +21,19 @@ def showFiles(msg, usr):
     ])
     for count, file in enumerate(listdir(path_user)):
         path_files = join(path_user, file)
+        try:
+            path_files = cleanString(path_files)
+        except Exception as e: 
+            print(e)
+            
         if isfile(path_files):
-            try:
-                path_files = cleanString(path_files)
-            except Exception as e: 
-                print(e)
             size = round(getsize(path_files) / 1000024, 2)
             list_files += (f"\n❯ **/op_{count+1} - {size} MB - `{file}`**\n")
             total_size += size
-            file_list[count+1] = path_files
+        else:
+            list_files += (f"\n🗂 **/op_{count+1} - `{file}`**\n")
             
+        file_list[count+1] = path_files
         userFiles[usr] = file_list
         
     sms = msg.reply(list_files, reply_markup=btn)
