@@ -6,6 +6,6 @@
 
 tasks:
   - command: export PYENV_VERSION=3.10
-  - command: python iniciar_gitpod.py
+  - command: python3 iniciar_gitpod.py
 
 

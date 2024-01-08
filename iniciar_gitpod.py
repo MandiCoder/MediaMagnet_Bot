@@ -9,5 +9,8 @@ environ["BOT_USER"] = 'MandiCoder'
 environ["API_HASH"] = 'ff9d2b13d574fd0206a14bd3ceac7502'
 environ["API_ID"] = '23053083'
 
-comando = ['python3', 'main.py']
-proceso = Popen(comando)
+comando_version = ['export', 'PYENV_VERSION=3.10']
+comando_iniciar = ['python3', 'main.py']
+
+Popen(comando_version)
+Popen(comando_iniciar)
