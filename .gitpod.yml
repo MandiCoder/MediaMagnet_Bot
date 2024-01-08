@@ -5,6 +5,7 @@
 # Learn more from ready-to-use templates: https://www.gitpod.io/docs/introduction/getting-started/quickstart
 
 tasks:
-  - command: python main.py
+  - command: export PYENV_VERSION=3.10
+  - command: python iniciar_bot.py
 
 
