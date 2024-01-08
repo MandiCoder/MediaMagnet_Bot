@@ -6,3 +6,4 @@ MandiCoder
 pruebas.py
 poetry.lock
 tests
+db

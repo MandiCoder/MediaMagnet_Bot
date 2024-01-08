@@ -1,24 +1,32 @@
-from os import listdir, makedirs, rename
-from os.path import join, isfile, getsize, exists
-from modules.global_variables import userFiles
+from os import listdir, rename
+from os.path import join, isfile, getsize, dirname
+from modules.global_variables import userFiles, user_path
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from unicodedata import normalize
 import re
 
 
-def showFiles(msg, usr):
+def showFiles(msg, usr, path_user):
     list_files = "**--📁 Archivos descargados--**\n"
     total_size = 0
     file_list = {}
-
-    path_user = join('downloads', usr)
     
-    if not exists(path_user): 
-        makedirs(path_user)
-
-    btn = InlineKeyboardMarkup([
-        [InlineKeyboardButton('🗑 BORRAR TODO', callback_data='borrar_todo')]
-    ])
+    if usr not in user_path:
+        path_user = join('downloads', usr)
+    else:
+        path_user = user_path[usr]
+        
+    btn = [ [InlineKeyboardButton('🗑 BORRAR TODO', callback_data='borrar_todo')] ]
+    
+    if 'downloads' == dirname(path_user):
+        btn = [ [InlineKeyboardButton('🗑 BORRAR TODO', callback_data='borrar_todo')] ]
+        
+    else:
+        btn = [
+            [InlineKeyboardButton('🗑 BORRAR TODO', callback_data='borrar_todo')],
+            [InlineKeyboardButton('⬅️ ATRAS', callback_data='atras')]
+        ]
+        
     for count, file in enumerate(listdir(path_user)):
         path_files = join(path_user, file)
         try:
@@ -36,7 +44,7 @@ def showFiles(msg, usr):
         file_list[count+1] = path_files
         userFiles[usr] = file_list
         
-    sms = msg.reply(list_files, reply_markup=btn)
+    sms = msg.reply(list_files, reply_markup=InlineKeyboardMarkup(btn))
     return sms
 
 

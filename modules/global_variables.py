@@ -4,6 +4,7 @@ from pyrogram.types import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyb
 userFiles = {}
 download_queues = {}
 download_queues_url = {}
+user_path = {}
 
 # BOTONES
 btn_general = ReplyKeyboardMarkup([

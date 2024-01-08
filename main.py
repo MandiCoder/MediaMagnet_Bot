@@ -8,15 +8,18 @@ from modules.database import create_db, update_db, read_db
 from modules.generate_words import generateWord
 from modules.auto_upload import autoUpload
 from modules.extract_images import extractImages
-from modules.global_variables import (btn_general, btn_opciones, userFiles, download_queues, download_queues_url, access_bot)
 from modules.torrentp.torrent_downloader import TorrentDownloader
 from modules.compress_files import compressFiles
+from modules.add_buttons import addButtons
+from modules.global_variables import (btn_general, btn_opciones, userFiles, 
+                                      download_queues, download_queues_url, access_bot,
+                                      user_path)
 
 # MODULOS EXTERNOS
 from pickle import dump, load
 from pyrogram import filters
-from pyrogram.types import (InlineKeyboardButton, InlineKeyboardMarkup, ForceReply)
-from os.path import join, basename, splitext, exists, isfile, isdir
+from pyrogram.types import (InlineKeyboardMarkup, ForceReply)
+from os.path import join, basename, exists, isfile, isdir, dirname
 from os import unlink, rename, listdir, makedirs
 from queue import Queue as cola
 from shutil import rmtree
@@ -31,13 +34,13 @@ def enviar_mensajes(app, msg):
         msg.reply('Hola, le doy la bienvenida a mi Bot')
         return
     else: 
-        msg.reply('**Ola perra**', reply_markup=btn_general)
+        msg.reply('**Ola jefe**', reply_markup=btn_general)
     
 
     
     
     
-# ------------------------------------------------------------------------- VER ARCHIVOS DESCARGADOS
+# ------------------------------------------------------------------------- VER ARCHIVOS 📁 
 @bot.app.on_message(filters.regex('📁 Archivos'))
 def mostrar_archivos(app, msg):
     username = msg.from_user.username
@@ -52,7 +55,7 @@ def mostrar_archivos(app, msg):
     else:    
         msg.delete()
         
-    sms = showFiles(msg, msg.from_user.username)
+    sms = showFiles(msg, username, user_path)
     
     with open(join(file_path), 'wb') as pk:
         dump(sms, pk)
@@ -91,15 +94,20 @@ def enviar_mensaje_comprimir(app, msg):
 def recibir_mensaje_comprimir(app, msg):
     bot.app.delete_messages(msg.chat.id, (msg.id, msg.reply_to_message.id))
     username = msg.from_user.username
-    user_path = join('downloads', username)
+    
+    if username not in user_path:
+        path = join('downloads', username)
+    else:
+        path = user_path[username]
+        
     list_files = []
     
-    for i in listdir(user_path):
-        full_path = join(user_path, i)
+    for i in listdir(path):
+        full_path = join(path, i)
         if isfile(full_path):
             list_files.append(full_path)
     
-    compressFiles(app, msg, list_files, msg.text, user_path)
+    compressFiles(app, msg, list_files, msg.text, path)
     
     
 
@@ -190,47 +198,32 @@ def descargarArchivosEnGrupos(app, msg):
 def opcionesArchivo(app, msg):
     username = msg.from_user.username
     file = userFiles[username][int(msg.text.split('_')[-1])]
-    url = f"https://{bot.NAME_APP}.onrender.com/file/{username}/{file}".replace(' ', '%20')
-    # http://127.0.0.1:8000/file/KOD_16/
-    
-    if bot.NAME_APP is not None:
-        url = f"https://{bot.NAME_APP}.onrender.com/file/{username}/{file}".replace(' ', '%20')
-    else:
-        url = f"http://127.0.0.1:8000/file/{file}".replace(' ', '%20')
-
-    lista_botones = [
-        [InlineKeyboardButton('⬆️ SUBIR ARCHIVO', callback_data=f'upload {msg.text.split("_")[-1]}')],
-        [InlineKeyboardButton('📝 CAMBIAR NOMBRE', callback_data=f'rename {msg.text.split("_")[-1]}')],
-        [InlineKeyboardButton('🚮 ELIMINAR ARCHIVO', callback_data=f'del_file {msg.text.split("_")[-1]}')],
-        [InlineKeyboardButton('🌄 AGREGAR IMAGEN', callback_data=f'add_thumb {msg.text.split("_")[-1]}')],
-        [InlineKeyboardButton('🔗 ENLACE', url=url)],
-    ]
-    
-    if splitext(file)[1] in ('.mp4', 'mkv'):
-        lista_botones.insert(2, [InlineKeyboardButton('🗂 EXTRAER IMAGENES', callback_data=f'extract_img {msg.text.split("_")[-1]}')])
-        
-    elif file.endswith(".torrent"):
-        lista_botones = [
-            [InlineKeyboardButton('🏴‍☠️ DESCARGAR TORRENT', callback_data=f'torrentdl {msg.text.split("_")[-1]}')],
-            [InlineKeyboardButton('🚮 ELIMINAR ARCHIVO', callback_data=f'del_file {msg.text.split("_")[-1]}')],
-        ]
-    elif isdir(file):
-        lista_botones = [
-            [InlineKeyboardButton('📦 COMPRIMIR CARPETA', callback_data=f'compress_folder {msg.text.split("_")[-1]}')],
-            [InlineKeyboardButton('📝 CAMBIAR NOMBRE', callback_data=f'rename {msg.text.split("_")[-1]}')],
-            [InlineKeyboardButton('🚮 ELIMINAR CARPETA', callback_data=f'del_file {msg.text.split("_")[-1]}')],
-        ]
-    
     eliminarMensaje(username, msg.id)
-    try:
-        msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(lista_botones))
-    except Exception as e:
-        print(e)
-        del lista_botones[-1]
-        msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(lista_botones))
+    msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(addButtons(file, msg)))
 
 
 
+
+# ------------------------------------------------------------------------ ABRIR CARPETA 📂
+@bot.app.on_callback_query(filters.create(lambda f, c, u: "open_folder" in u.data))
+def abrirCarpeta(app, callback):
+    global user_path
+    username = callback.from_user.username
+    folder = userFiles[username][int(callback.data.split(' ')[-1])]
+    user_path[username] = folder
+    callback.message.delete()
+    showFiles(callback.message, username, user_path)
+
+
+
+# ------------------------------------------------------------------------ IR ATRAS ⬅️
+@bot.app.on_callback_query(filters.create(lambda f, c, u: "atras" in u.data))
+def volverAtras(app, callback):
+    global user_path
+    username = callback.from_user.username
+    user_path[username] = dirname(user_path[username])
+    callback.message.delete()
+    showFiles(callback.message, username, user_path)
 
 
 # ------------------------------------------------------------------------ COMPRIMIR CARPETA 📦
@@ -238,14 +231,20 @@ def opcionesArchivo(app, msg):
 def comprimirCarpeta(app, callback):
     username = callback.from_user.username
     folder = userFiles[username][int(callback.data.split(' ')[-1])]
-    path_downloads = join('downloads', username)
+    
+    
+    if username not in user_path:
+        path = join('downloads', username)
+    else:
+        path = user_path[username]
+        
     list_files = set()
     
     for file in listdir(folder):
         list_files.add(join(folder, file))
     
     callback.message.delete()
-    compressFiles(app, callback.message, list_files, basename(folder), path_downloads)
+    compressFiles(app, callback.message, list_files, basename(folder), path)
 
 
 
@@ -286,7 +285,7 @@ def cambiarNombre(app, msg):
            join(path_downloads, msg.text))
     
     msg.reply(f'**✅ Nombre cambiado a: `{msg.text}`**')
-    sms = showFiles(msg, username)
+    sms = showFiles(msg, username, user_path)
     guardarMensaje(username, sms)
 
 
@@ -307,7 +306,11 @@ def subirArchivo(app, callback):
 def subirTodo(app, msg):
     username = msg.from_user.username
     eliminarMensaje(username, msg.id)
-    path_downloads = join('downloads', username)
+    if username not in user_path:
+        path_downloads = join('downloads', username)
+    else:
+        path_downloads = user_path[username]
+    
     msg.delete()
     sms = msg.reply(f'**📤 Subiendo {len(listdir(path_downloads))} Archivos**')
 
@@ -341,7 +344,7 @@ def elimiarArchivo(app, callback):
         rmtree(file)    
     callback.message.edit(f'✅ {basename(file)} eliminado')
     
-    sms = showFiles(callback.message, username)
+    sms = showFiles(callback.message, username, user_path)
     guardarMensaje(username, sms)
 
 
@@ -354,15 +357,20 @@ def descargarArchivosTelegram(app, message):
         return
     
     username = message.from_user.username
-    path_user = join('downloads', username)
+    
+    if username not in user_path:
+        print("No esta")
+        user_path[username] = join('downloads', username)
 
     if username in download_queues:
-        download_queues[username].put( (message, path_user) )
+        download_queues[username].put( (message, user_path[username]) )
     else:
         queue = cola()
-        queue.put( (message, path_user) )
+        queue.put( (message, user_path[username]) )
         download_queues[username] = queue
         download_files_telegram(app, username)
+        
+    # eliminarMensaje(username, message.id)
 
 
 # ---------------------------------------------------------- MANEJAR MENSAJES

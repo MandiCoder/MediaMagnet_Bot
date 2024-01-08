@@ -1,6 +1,7 @@
-from os import listdir, makedirs, unlink, rmdir
+from os import listdir, makedirs, unlink
 from os.path import join
 from modules.upload_files import uploadFile
+from shutil import rmtree
 from .download_files import downloadFiles
 from .database import read_db
 from time import sleep
@@ -18,4 +19,5 @@ def autoUpload(app, msg, path_download, url):
         unlink(file)
         sleep(5)
     
-    rmdir(path_download)
+    
+    rmtree(path_download)
