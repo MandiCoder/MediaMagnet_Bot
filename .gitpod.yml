@@ -5,7 +5,7 @@
 # Learn more from ready-to-use templates: https://www.gitpod.io/docs/introduction/getting-started/quickstart
 
 tasks:
-  - command: export PYENV_VERSION=3.10
-  - command: python3 iniciar_gitpod.py
+  - command: pyenv global 3.10
+  - command: python3 main.py
 
 
