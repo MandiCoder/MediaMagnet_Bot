@@ -204,6 +204,16 @@ def opcionesArchivo(app, msg):
 
 
 
+# ------------------------------------------------------------------------ AGREGAR THUMB 🌄
+@bot.app.on_callback_query(filters.create(lambda f, c, u: "add_thumb" in u.data)) 
+def agregarThumb(app, callback):
+    pass
+    
+    
+    
+    
+    
+    
 # ------------------------------------------------------------------------ ABRIR CARPETA 📂
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "open_folder" in u.data))
 def abrirCarpeta(app, callback):
@@ -224,6 +234,8 @@ def volverAtras(app, callback):
     user_path[username] = dirname(user_path[username])
     callback.message.delete()
     showFiles(callback.message, username, user_path)
+
+
 
 
 # ------------------------------------------------------------------------ COMPRIMIR CARPETA 📦
