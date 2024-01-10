@@ -1,5 +1,4 @@
-import sys
-from time import time, localtime
+from time import localtime
 
 class Downloader:
     def __init__(self, session, torrent_info, save_path, libtorrent, is_magnet):
@@ -36,14 +35,16 @@ class Downloader:
         while not self._status.is_seeding:
             s = self.status()
             
-            if self._second != localtime().tm_sec:
+            if self._second % 3 == 0:
                 try:
                     sms.edit_text('**\rComplete: `%.2f%%` \nDown: `%.1f kB/s` \nUp: `%.1f kB/s` \nPeers: `%d` \n__%s__**' % (
                         s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
                         s.num_peers, s.state))
+                    self._second = 0
                 except:
                     pass
-                self._second = localtime().tm_sec
+                
+            self._second = localtime().tm_sec
 
         sms.edit_text("✅ **Descarga completa**")
         print(self._status.name, 'downloaded successfully.')
