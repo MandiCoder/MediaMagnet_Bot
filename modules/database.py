@@ -6,7 +6,8 @@ def create_db(username:str):
         'username'      :   username,
         'zip_size'      :   2000,
         'auto_upload'   :   True,
-        'video_quality' :   22 # 720p
+        'video_quality' :   22, # 720p
+        'up_compress'   :   True
     }
     
     if not exists(join('db', f'{username}.json')):

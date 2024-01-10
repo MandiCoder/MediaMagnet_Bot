@@ -1,1 +1,7 @@
-{"username": "MandiCoder", "zip_size": 2000, "auto_upload": true, "video_quality": 22}
+{
+    "username": "MandiCoder",
+    "zip_size": 2000,
+    "auto_upload": true,
+    "video_quality": 22,
+    "up_compress": true
+}

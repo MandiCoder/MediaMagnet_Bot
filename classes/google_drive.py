@@ -5,7 +5,7 @@ from time import localtime
 import sys
 
 class googleDrive():
-    def __init__(self, message_telegram) -> None:
+    def __init__(self, message_telegram = None) -> None:
         self._credential_path = 'secret/credentials_module.json'
         self._drive = self.login()
         self._second = 0

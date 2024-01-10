@@ -1,22 +1,22 @@
 import yt_dlp
-from .progres_bar import  progresswget, progressytdl
+from .progres_bar import  progresswget, progressytdl, progressddl
 from .mediafire import get as getmf
 from .youtubedl_mod import YoutubeDL
+from .torrentp import TorrentDownloader
 from classes.google_drive import googleDrive
 from modules.wget import download
 from os.path import join, basename
 from user_agent import generate_user_agent
 from requests import get
-from .torrentp import TorrentDownloader
-# from pyrogram.errors import ChannelInvalid
+from time import time
+from pyrogram.errors import ChannelInvalid
 
 
 
 
 
 
-def downloadFiles(app, chat_id, url, path_download, video_quality):
-    
+def downloadFiles(app, chat_id, url, path_download, video_quality, userbot):
     options = {
                 'format': 'best',
                 'outtmpl': join(path_download, '%(title)s.%(ext)s')    
@@ -32,7 +32,11 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
 
         elif 'https://youtu' in url: # ------------------------------------------- DESCARGAR VIDEOS DE YOUTUBE
             ytdl = YoutubeDL(progressytdl, sms, app, False)
-            ytdl.download(url, path_download, video_quality)
+            try:
+                ytdl.download(url, path_download, video_quality)
+            except Exception as e:
+                print(e)
+                ytdl.download(url, path_download, 18)
             
             
         elif 'instagram.com' in url: # ------------------------------------------- DESCARGAR REELS DE INSTAGRAM
@@ -41,7 +45,7 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
         
         
         elif "drive.google.com" in url: # ---------------------------------------- DESCARGAR ARCHIVOS DE GOOGLE DRIVE
-            googleDrive(sms).download(url, path_download)
+            googleDrive().download(url, path_download)
 
             
             
@@ -55,6 +59,10 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
             torrent_file.start_download()
         
         
+        elif url.startswith("https://t.me/"): # ----------------------------------------- DESCARGA DE CANALES REESTRINGIDOS
+            download_restricted(sms, url, userbot, path_download)
+        
+        
         elif url.startswith("http") and "t.me/" not in url: # ----------------------------------------- DESCARGAR ARCHIVOS DE ENLACE DIRECTO
             download_http(app, sms, url, path_download)
         
@@ -65,10 +73,8 @@ def downloadFiles(app, chat_id, url, path_download, video_quality):
             print(x)
             sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
     
-
-
-
-
+    
+# DESCARGA DESDE HTTP    
 def download_http(app, sms, url, path_download):
     try:
         download(url, sms, app, out=path_download, bar=progresswget)
@@ -84,44 +90,41 @@ def download_http(app, sms, url, path_download):
 
 
 
-
-
-    # ###################################################### DESCARGAR ARCHIVOS DE CANALES REESTRINGIDOS
-    # if url.startswith("https://t.me/"):
-    #     sms = app.send_message(chat_id, "📥 **Descargando archivo...**")
-    #     if url.endswith("?single"): 
-    #         url = url.replace("?single", "")
-
-    #     if url.startswith("https://t.me/c/"):
-    #         try:
-    #             chat = "-100" + url.split("/")[-2]
-    #             msg_id = url.split("/")[-1]
-    #             msge = userbot.get_messages(int(chat), int(msg_id))
-    #             if msge.media:
-    #                 start = time()
-    #                 userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
-    #                 return sms
-    #         except ChannelInvalid:
-    #             try: 
-    #                 sms.delete()
-    #             except Exception as e:
-    #                 print(e) 
-                    
-    #             sms.reply("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
-    #     else:
-    #         try:
-    #             chat = url.split("/")[-2]
-    #             msg_id = url.split("/")[-1]
-    #             msge = userbot.get_messages(chat, int(msg_id))
-    #             if msge.media:
-    #                 start = time()
-    #                 userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
-    #                 return sms
-    #         except ChannelInvalid:
-    #             try: 
-    #                 sms.delete()
-    #             except Exception as e: 
-    #                 print(e)
-    #             sms.reply("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
+# DESCARGA DE CANALES REESTRINGIDOS
+def download_restricted(sms, url, userbot, path_download):
+    if url.endswith("?single"): 
+        url = url.replace("?single", "")
+        
+    if url.startswith("https://t.me/c/"):
+        try:
+            chat = "-100" + url.split("/")[-2]
+            msg_id = url.split("/")[-1]
+            msge = userbot.get_messages(int(chat), int(msg_id))
+            if msge.media:
+                start = time()
+                userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
+                sms.edit_text("✅ **Descarga completa**")
+        except ChannelInvalid:
+            try: 
+                sms.delete()
+            except Exception as e:
+                print(e) 
+                
+            sms.reply("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
+    else:
+        try:
+            chat = url.split("/")[-2]
+            msg_id = url.split("/")[-1]
+            msge = userbot.get_messages(chat, int(msg_id))
+            if msge.media:
+                start = time()
+                userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
+                sms.edit_text("✅ **Descarga completa**")
+        except ChannelInvalid:
+            try: 
+                sms.delete()
+            except Exception as e: 
+                print(e)
+            sms.reply("**⚠️ PRIMERO DEBE INTRODUCIR EL ENLACE DE INVITACIÓN DEL CANAL**")
 
         

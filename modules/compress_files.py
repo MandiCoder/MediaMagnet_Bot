@@ -1,4 +1,4 @@
-from os.path import join
+from os.path import join, isfile
 from zipfile import ZipFile, ZIP_DEFLATED
 from .global_variables import btn_general
 

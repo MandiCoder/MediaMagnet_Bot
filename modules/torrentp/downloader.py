@@ -35,7 +35,7 @@ class Downloader:
         while not self._status.is_seeding:
             s = self.status()
             count += 1
-            if count > 50000:
+            if count > 30000:
                 try:
                     count = 0
                     sms.edit_text('**\rComplete: `%.2f%%` \nDown: `%.1f kB/s` \nUp: `%.1f kB/s` \nPeers: `%d` \n__%s__**' % (
@@ -43,7 +43,6 @@ class Downloader:
                         s.num_peers, s.state))
                 except:
                     pass
-            print(count)
                 
 
         sms.edit_text("✅ **Descarga completa**")
