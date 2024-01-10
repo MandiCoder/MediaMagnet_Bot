@@ -50,7 +50,7 @@ def progressddl(current, total, msg, start, rest=0):
     global sec
     act = time() - start
     speed = round((round(current / 1000000, 2) / act), 2)
-    if sec % 3 == 0:
+    if sec != localtime().tm_sec:
         try:
             txt = f"**🚛 Descargando...\n{update_progress_bar(current, total)}"
             txt += f"\n\n📁 Archivos pendientes: {rest}"
@@ -70,7 +70,7 @@ def progressupl(current, total, sms, totalFiles, count, start):
     global sec
     act = time() - start
     speed = round((round(current / 1000000, 2) / act), 2)
-    if sec % 3 == 0:
+    if sec != localtime().tm_sec:
         try:
             sms.edit_text(
                 f"**📤 Subiendo: {count}-{totalFiles}\n__{update_progress_bar(current,total)}__\n🗄 Total :{round(total/1000000,2)} MB \n🗂 Subido: {round(current/1000000,2)}\n⚡️ Velocidad: {speed} MB/s**"
@@ -87,7 +87,7 @@ def progressytdl(current, total, speed, filename, tiempo, message, bots):
     # porcent = int(current * 100 / total)
     filename = filename.split("/")[-1]
     global sec
-    if sec % 3 == 0:
+    if sec != localtime().tm_sec:
         try:
             text = f"📥 **Descargando**\n\n💾**Name**: {filename} \n"
             text += f"{update_progress_bar(current,total)}\n\n"
@@ -107,7 +107,7 @@ def progressytdl(current, total, speed, filename, tiempo, message, bots):
 def progresstwitch(current, speed, filename, tiempo, message, bots):
     filename = filename.split("\\")[-1]
     global sec
-    if sec % 3 == 0:
+    if sec != localtime().tm_sec:
         try:
             text = f"📥 **Descargando\n\n💾Name: {filename} \n\n**"
             text += f"🗂 **Descargado: {round(current/1000000,2)}MB\n**"
@@ -127,7 +127,7 @@ def progresswget(current, total, filename, start, message, bots):
     act = time() - start
     speed = round((round(current / 1000000, 2) / act), 2)
     global sec
-    if sec % 3 == 0:
+    if sec != localtime().tm_sec:
         try:
             text = f"**📥 Descargando...**\n"
             text += f"__{update_progress_bar(current,total)} {speed} MB/s__\n\n"

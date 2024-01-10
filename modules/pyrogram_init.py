@@ -1,5 +1,6 @@
 from pyrogram.methods.utilities.idle import idle
 from modules.ansi import green
+from .server import index
 from pyrogram import Client
 from aiohttp import ClientSession
 from asyncio import sleep as asyncsleep
@@ -40,6 +41,7 @@ class PyrogramInit():
     async def run_server(self):
         server = web.Application()
         server.router.add_get("/file/{route}/{file_name}", download_file)
+        server.router.add_get("/", index)
         runner = web.AppRunner(server)
         
         await self.app.start()

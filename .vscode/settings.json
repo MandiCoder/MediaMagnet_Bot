@@ -1,4 +1,5 @@
 {
     "docwriter.language": "Spanish",
-    "editor.inlineSuggest.showToolbar": "always"
+    "editor.inlineSuggest.showToolbar": "always",
+    "materialkv.pythonFile": "main.py"
 }

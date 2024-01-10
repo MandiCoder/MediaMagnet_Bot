@@ -1,4 +1,5 @@
 import asyncio
+import jinja2
 import os
 from aiohttp import web
 from aiohttp import streamer
@@ -46,3 +47,17 @@ async def download_file(request):
         )
 
     return web.Response(body=file_sender(file_path=file_path), headers=headers)
+
+
+
+
+
+async def index(request):
+    file_path = "./templates/index.html"
+    # Envio de Parametros al HTML
+    nombre = "Rey"
+    data = {"nombre": nombre, "estilos": "styles.css"}
+    with open(file_path, "r") as file:
+        template = jinja2.Template(file.read())
+        html = template.render(data)
+    return web.Response(text=html, content_type="text/html")

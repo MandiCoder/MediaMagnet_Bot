@@ -12,7 +12,6 @@ class Downloader:
         self._lt = libtorrent
         self._add_torrent_params = None
         self._is_magnet = is_magnet
-        self._second = 0
 
     def status(self):
         if not self._is_magnet:
@@ -32,19 +31,20 @@ class Downloader:
 
     def download(self, sms):
         print(f'Start downloading {self.name}')
+        count = 0
         while not self._status.is_seeding:
             s = self.status()
-            
-            if self._second % 3 == 0:
+            count += 1
+            if count > 50000:
                 try:
+                    count = 0
                     sms.edit_text('**\rComplete: `%.2f%%` \nDown: `%.1f kB/s` \nUp: `%.1f kB/s` \nPeers: `%d` \n__%s__**' % (
                         s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
                         s.num_peers, s.state))
-                    self._second = 0
                 except:
                     pass
+            print(count)
                 
-            self._second = localtime().tm_sec
 
         sms.edit_text("✅ **Descarga completa**")
         print(self._status.name, 'downloaded successfully.')
