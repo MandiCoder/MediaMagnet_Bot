@@ -24,7 +24,7 @@ def compressFiles(app:object, msg:object, files:list, name_zip:str, dest_folder:
     zip_file.close()
     
     app.delete_messages(msg.chat.id, (sms_text.id, sms_sticker.id))
-    sms_text.reply_text('**✅ Tarea finalizada**', reply_markup=btn_general)
+    return sms_text.reply_text('**✅ Tarea finalizada**', reply_markup=btn_general)
                 
         
     

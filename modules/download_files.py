@@ -64,11 +64,13 @@ def downloadFiles(app, chat_id, url, path_download, video_quality, userbot):
         
         
         elif url.startswith("http") and "t.me/" not in url: # ----------------------------------------- DESCARGAR ARCHIVOS DE ENLACE DIRECTO
+            print("Descargando enlace:", url)
             download_http(app, sms, url, path_download)
         
         
         
         sms.edit_text("✅ **Descarga completa**")
+        return sms
     except Exception as x:
             print(x)
             sms.edit_text(f"❌ **No se pudo descargar el archivo: \n{x}** ❌")
@@ -103,7 +105,6 @@ def download_restricted(sms, url, userbot, path_download):
             if msge.media:
                 start = time()
                 userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
-                sms.edit_text("✅ **Descarga completa**")
         except ChannelInvalid:
             try: 
                 sms.delete()
@@ -119,7 +120,6 @@ def download_restricted(sms, url, userbot, path_download):
             if msge.media:
                 start = time()
                 userbot.download_media(msge, file_name=f"{path_download}/", progress=progressddl, progress_args=(sms, start, 0))
-                sms.edit_text("✅ **Descarga completa**")
         except ChannelInvalid:
             try: 
                 sms.delete()

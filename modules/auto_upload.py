@@ -18,28 +18,33 @@ def autoUpload(app, msg, url, userbot):
     up_compress = read_db(msg.from_user.username)['up_compress']
     makedirs(path_download)
     
-    downloadFiles(app, msg.chat.id, url, path_download, video_quality, userbot)
-    
-    if listdir(path_download) == 1:
+    sms = downloadFiles(app, msg.chat.id, url, path_download, video_quality, userbot)
+    sms.delete()
+
+    if len(listdir(path_download)) == 1:
         for i in listdir(path_download):
             file = join(path_download, i)
-            uploadFile(app, msg, file, msg.from_user.username)
-            sleep(5)
             if isdir(file):
                 list_files = []
-                for i in listdir(path_download): 
-                    list_files.append(join(path_download, file, i))
-                compressFiles(app, msg, list_files, file, './')    
-                uploadFile(app, msg, file + ".zip", msg.from_user.username)
-                unlink(file + ".zip")
+                for j in listdir(file): 
+                    list_files.append(join(file, j))  
+                sms = compressFiles(app, msg, list_files, i, './')
+                uploadFile(app, msg, i + '.zip', msg.from_user.username)
+                sms.delete()
+                unlink(i + '.zip')
+            else:
+                uploadFile(app, msg, file, msg.from_user.username)
+            sleep(5)
     else:
+        print('Comprimiendo..')
         if up_compress:
             list_files = []
             for file in listdir(path_download): 
                 list_files.append(join(path_download, file))
             name = getName(url)
-            compressFiles(app, msg, list_files, name, './')
+            sms = compressFiles(app, msg, list_files, name, './')
             uploadFile(app, msg, name + ".zip", msg.from_user.username)
+            sms.delete()
             unlink(name+ ".zip")
         else:    
             for i in listdir(path_download):
@@ -50,9 +55,8 @@ def autoUpload(app, msg, url, userbot):
     rmtree(path_download)
     
     
-    
-    
-    
+
+
     
 def getName(url:str) -> str:
     name = ''

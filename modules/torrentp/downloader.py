@@ -1,4 +1,5 @@
-from time import localtime
+from time import localtime, sleep
+import sys
 
 class Downloader:
     def __init__(self, session, torrent_info, save_path, libtorrent, is_magnet):
@@ -34,6 +35,11 @@ class Downloader:
         count = 0
         while not self._status.is_seeding:
             s = self.status()
+            print('\r%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d) %s' % (
+                s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
+                s.num_peers, s.state), end=' ')
+            sys.stdout.flush()
+
             count += 1
             if count > 30000:
                 try:
@@ -43,10 +49,15 @@ class Downloader:
                         s.num_peers, s.state))
                 except:
                     pass
-                
-
-        sms.edit_text("✅ **Descarga completa**")
         print(self._status.name, 'downloaded successfully.')
+
+    def sizeof(num: int, suffix="B"):
+        for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
+            if abs(num) < 1024.0:
+                return "%3.1f%s%s" % (num, unit, suffix)
+            num /= 1024.0
+        return "%.1f%s%s" % (num, "Yi", suffix)
+
 
     def __str__(self):
         pass
