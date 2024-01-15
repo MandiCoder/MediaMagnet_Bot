@@ -29,6 +29,7 @@ def autoUpload(app, msg, url, userbot):
                 for j in listdir(file): 
                     list_files.append(join(file, j))  
                 sms = compressFiles(app, msg, list_files, i, './')
+                rmtree(path_download)
                 uploadFile(app, msg, i + '.zip', msg.from_user.username)
                 sms.delete()
                 unlink(i + '.zip')
@@ -43,6 +44,7 @@ def autoUpload(app, msg, url, userbot):
                 list_files.append(join(path_download, file))
             name = getName(url)
             sms = compressFiles(app, msg, list_files, name, './')
+            rmtree(path_download)
             uploadFile(app, msg, name + ".zip", msg.from_user.username)
             sms.delete()
             unlink(name+ ".zip")
