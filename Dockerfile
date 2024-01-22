@@ -9,7 +9,7 @@ ENV PATH="${PATH}:/root/.poetry/bin"
 WORKDIR /usr/src/app
 
 # Copia solo el archivo de bloqueo de dependencias y el archivo pyproject.toml
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml ./
 
 # Instala las dependencias usando Poetry
 RUN poetry install --no-dev

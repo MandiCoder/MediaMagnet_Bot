@@ -1,7 +1,7 @@
 from pyrogram.methods.utilities.idle import idle
 from modules.ansi import green
 from .server import index
-from .send_mail import sendMail
+# from .send_mail import sendMail
 from pyrogram import Client
 from aiohttp import ClientSession
 from asyncio import sleep as asyncsleep
