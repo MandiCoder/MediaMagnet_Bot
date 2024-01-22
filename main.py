@@ -176,7 +176,7 @@ def descargar_archivos(username):
     while not queue.empty():
         app, message_id, url, path_user = queue.get()
         try:
-            downloadFiles(app, message_id, url, path_user, read_db(username)['video_quality'])
+            downloadFiles(app, message_id, url, path_user, read_db(username)['video_quality'], bot.user_bot)
         except Exception as x:
             app.send_message(message_id, x)
         queue.task_done()

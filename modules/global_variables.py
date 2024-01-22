@@ -19,6 +19,6 @@ btn_opciones = InlineKeyboardMarkup([
 
 # ACCESO AL BOT
 access_bot = (
-    'iwachu'
+    'MandiCoder'
 )
 
