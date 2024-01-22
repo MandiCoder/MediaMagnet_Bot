@@ -6,17 +6,11 @@ from pyrogram import Client
 from aiohttp import ClientSession
 from asyncio import sleep as asyncsleep
 from aiohttp import web
-from os import getenv, environ
-
+from dotenv import load_dotenv
+from os import getenv
 from modules.server import download_file
 
-environ["BOT_TOKEN"] = '6953816594:AAG-ECps_eDr4a38_xmTUZmrM_ONIRbNHh4'
-environ["DATABASE"] = 'mongodb://127.0.0.1'
-environ["SESSION_STRING"] = 'AQEjY1QAigM-3n_RXKS94gzOr_yYKbj1RZ6cO1gZVrU2H6zQHhxDKM7kE9jdYRLjGzSOOXmoDktwfTrKuPsC8WVzExiSAAIPmetYg0cWaMTnQtWzORvEmkz4uZyFxfUo4lM56HxvLun4O4Djmu7b7bswYekLNsPr2AYkN1CBlgjEoKfbT9yCul2lkh3FxL4HTIvF_62aWUaRDYZWkGLQkivTJrRzlg786K6LHFgLixAskOhfko3nqBiBxXM1A3HExEFtXYdhZhf2pWCZOY2rYl7TZT8JVaJ7UXrakgfDPiNTRg37k0hflbiyiE1poFMuiNMzYSapeQqPG7go8V0ubdklcfkp4AAAAABnQMmXAA'
-environ["PORT"] = '8000'
-environ["BOT_USER"] = 'MandiCoder'
-environ["API_HASH"] = 'ff9d2b13d574fd0206a14bd3ceac7502'
-environ["API_ID"] = '23053083'
+load_dotenv()
 
 class PyrogramInit():
     def __init__(self, 
@@ -38,8 +32,9 @@ class PyrogramInit():
         
     def iniciar_bot(self):
         print(green("INICIANDO BOT"))
+        sendMail('BOT INICIADO')
         self.app.loop.run_until_complete(self.run_server())
-        self.app.loop.run_until_complete(self.despertar())
+        self.app.loop.run_until_completeself.despertar()
         idle()
 
     async def despertar(self, sleep_time=10 * 60):

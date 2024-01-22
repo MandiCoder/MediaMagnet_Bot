@@ -1,10 +1,12 @@
 *.session
 *.session-journal
+.env
+message.pkl
 __pycache__
 KOD_16
 MandiCoder
 pruebas.py
 poetry.lock
 iniciar_bot.py
-tests
+tests.py
 db
