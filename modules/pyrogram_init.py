@@ -32,7 +32,6 @@ class PyrogramInit():
         
     def iniciar_bot(self):
         print(green("INICIANDO BOT"))
-        sendMail('BOT INICIADO')
         self.app.loop.run_until_complete(self.run_server())
         self.app.loop.run_until_completeself.despertar()
         idle()
