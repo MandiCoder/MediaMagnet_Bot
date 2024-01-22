@@ -2,5 +2,8 @@
     "docwriter.language": "Spanish",
     "editor.inlineSuggest.showToolbar": "always",
     "materialkv.pythonFile": "main.py",
+<<<<<<< HEAD
     "peacock.color": "#61dafb"
+=======
+>>>>>>> cb8b566 (update)
 }

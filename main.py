@@ -5,7 +5,6 @@ from modules.show_files import showFiles
 from modules.download_files import downloadFiles
 from modules.upload_files import uploadFile
 from modules.database import create_db, update_db, read_db
-from modules.generate_words import generateWord
 from modules.auto_upload import autoUpload
 from modules.extract_images import extractImages
 from modules.torrentp.torrent_downloader import TorrentDownloader
