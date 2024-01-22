@@ -1,7 +1,7 @@
 from pyrogram.methods.utilities.idle import idle
 from modules.ansi import green
 from .server import index
-# from .send_mail import sendMail
+from .send_mail import sendMail
 from pyrogram import Client
 from aiohttp import ClientSession
 from asyncio import sleep as asyncsleep
@@ -32,8 +32,9 @@ class PyrogramInit():
         
     def iniciar_bot(self):
         print(green("INICIANDO BOT"))
+        sendMail("BOT INICIADO")
         self.app.loop.run_until_complete(self.run_server())
-        self.app.loop.run_until_completeself.despertar()
+        self.app.loop.run_until_complete(self.despertar())
         idle()
 
     async def despertar(self, sleep_time=10 * 60):
