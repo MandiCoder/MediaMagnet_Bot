@@ -1,9 +1,11 @@
 from pyrogram.types import InlineKeyboardButton
 from os.path import splitext, isdir
+from os import getenv
 
+HOST=getenv("HOST")
 
-def addButtons(file:str, msg:object):
-    # url = f"https://{bot.NAME_APP}.onrender.com/file/{username}/{file}".replace(' ', '%20')
+def addButtons(file:str, msg:object, username:str):
+    url = f"{HOST}/file/{username}/{file}".replace(' ', '%20')
     
     if splitext(file)[1] in ('.mp4', 'mkv'):
         lista_botones = [
@@ -34,7 +36,7 @@ def addButtons(file:str, msg:object):
             [InlineKeyboardButton('📝 CAMBIAR NOMBRE', callback_data=f'rename {msg.text.split("_")[-1]}')],
             [InlineKeyboardButton('🚮 ELIMINAR', callback_data=f'del_file {msg.text.split("_")[-1]}')],
             [InlineKeyboardButton('🌄 AGREGAR IMAGEN', callback_data=f'add_thumb {msg.text.split("_")[-1]}')],
-            # [InlineKeyboardButton('🔗 ENLACE', url=url)],
+            [InlineKeyboardButton('🔗 ENLACE', url=url)],
         ]
         
     return lista_botones
