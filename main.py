@@ -28,13 +28,7 @@ bot = PyrogramInit()
 @bot.app.on_message(filters.command('start'))
 def enviar_mensajes(app, msg):
     create_db(msg.from_user.username)
-
-    if not msg.from_user.username == 'MandiCoder':
-        msg.reply('Hola, le doy la bienvenida a mi Bot')
-        return
-    else: 
-        msg.reply('**Ola jefe**', reply_markup=btn_general)
-    
+    msg.reply(f'**Hola {msg.from_user.username}, le doy la bienvenida a mi Bot**', reply_markup=btn_general)
 
     
     
@@ -149,24 +143,25 @@ def cambiarPesoZips(app, msg):
 def descargar_archivos_url(app, msg):
     username = msg.from_user.username
     
-    if username not in access_bot:
-        autoUpload(app, msg, msg.text, bot.user_bot) 
+    # if username not in access_bot:
+    #     autoUpload(app, msg, msg.text, bot.user_bot) 
+        
+    # else:
+
+    path_user = join('downloads', username)
+    if not exists(path_user): 
+        makedirs(path_user)
+    file_info = (app, msg.chat.id, msg.text, path_user)
+    msg.reply("📌 __Enlace añadido a la cola__", quote=True)
+    
+    if username in download_queues_url:
+        download_queues_url[username].put(file_info)
         
     else:
-        path_user = join('downloads', username)
-        if not exists(path_user): 
-            makedirs(path_user)
-        file_info = (app, msg.chat.id, msg.text, path_user)
-        msg.reply("📌 __Enlace añadido a la cola__", quote=True)
-        
-        if username in download_queues_url:
-            download_queues_url[username].put(file_info)
-            
-        else:
-            queue = cola()
-            queue.put(file_info)
-            download_queues_url[username] = queue
-            descargar_archivos(username)
+        queue = cola()
+        queue.put(file_info)
+        download_queues_url[username] = queue
+        descargar_archivos(username)
 
 
 def descargar_archivos(username):
@@ -363,14 +358,13 @@ def elimiarArchivo(app, callback):
 # ---------------------------------------------------------------------- DESCARGAR ARCHIVOS DE TELEGRAM
 @bot.app.on_message(filters.media & filters.private)
 def descargarArchivosTelegram(app, message):
-    if not message.from_user.username == 'MandiCoder':
-        message.reply('Este bot solo lo puede usar su creador @MandiCoder 😛')
-        return
+    # if not message.from_user.username == 'MandiCoder':
+    #     message.reply('Este bot solo lo puede usar su creador @MandiCoder 😛')
+    #     return
     
     username = message.from_user.username
     
     if username not in user_path:
-        print("No esta")
         user_path[username] = join('downloads', username)
 
     if username in download_queues:

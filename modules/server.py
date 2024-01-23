@@ -30,7 +30,7 @@ async def download_file(request):
     file_name = request.match_info["file_name"]
     route = request.match_info["route"]
 
-    file_path = os.path.join(route, file_name)
+    file_path = os.path.join('downloads', route, file_name)
     headers = {
         "Content-disposition": "attachment; filename={file_name}".format(
             file_name=file_name

@@ -12,6 +12,7 @@ environ["PORT"] = '8000'
 environ["BOT_USER"] = 'MandiCoder'
 environ["API_HASH"] = 'ff9d2b13d574fd0206a14bd3ceac7502'
 environ["API_ID"] = '23053083'
+environ["HOST"] = 'https://8000-mandicoder-mediamagnetb-74zbk33th7s.ws-us107.gitpod.io'
 
 
 class eventHandler(FileSystemEventHandler):

@@ -47,7 +47,7 @@ class PyrogramInit():
     
     async def run_server(self):
         server = web.Application()
-        server.router.add_get("/file/{route}/{file_name}", download_file)
+        server.router.add_get("/file/downloads/{route}/{file_name}", download_file)
         server.router.add_get("/", index)
         runner = web.AppRunner(server)
         

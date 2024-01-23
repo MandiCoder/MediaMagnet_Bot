@@ -5,7 +5,7 @@ from os import getenv
 HOST=getenv("HOST")
 
 def addButtons(file:str, msg:object, username:str):
-    url = f"{HOST}/file/{username}/{file}".replace(' ', '%20')
+    url = f"{HOST}/file/{file}".replace(' ', '%20')
     
     if splitext(file)[1] in ('.mp4', 'mkv'):
         lista_botones = [

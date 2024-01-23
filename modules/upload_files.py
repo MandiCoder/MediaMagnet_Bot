@@ -57,7 +57,8 @@ def splitFiles(app, msg, file, username, size_file):
             chat_id, 
             path_file, 
             progress=progressupl, 
-            progress_args=(sms, len(list_files), count+1, start)
+            progress_args=(sms, len(list_files), count+1, start),
+            thumb='./assets/thumb.jpeg'
             )
         unlink(path_file)
         sms.delete()
