@@ -198,7 +198,7 @@ def opcionesArchivo(app, msg):
     username = msg.from_user.username
     file = userFiles[username][int(msg.text.split('_')[-1])]
     eliminarMensaje(username, msg.id)
-    msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(addButtons(file, msg)))
+    msg.reply(f'**MAS OPCIONES PARA: `{basename(file)}`**', reply_markup=InlineKeyboardMarkup(addButtons(file, msg, username)))
 
 
 

@@ -14,14 +14,14 @@ load_dotenv()
 class PyrogramInit():
     def __init__(self, 
                  PORT=getenv("PORT"), 
-                 NAME_APP=getenv("NAME_APP"),
+                 HOST=getenv("HOST"),
                  API_HASH=getenv("API_HASH"),
                  API_ID=getenv("API_ID"),
                  BOT_TOKEN=getenv("BOT_TOKEN"),
                  SESSION_STRING=getenv("SESSION_STRING")):
         
         self.PORT = PORT
-        self.NAME_APP = NAME_APP
+        self.HOST = HOST
         self.API_HASH = API_HASH
         self.API_ID = API_ID
         self.BOT_TOKEN = BOT_TOKEN
@@ -35,12 +35,15 @@ class PyrogramInit():
         self.app.loop.run_until_complete(self.despertar())
         idle()
 
+
     async def despertar(self, sleep_time=10 * 60):
         while True:
             await asyncsleep(sleep_time)
             async with ClientSession() as session:
-                async with session.get(f'https://{self.NAME_APP}.onrender.com/' + "/Despiertate"):
+                async with session.get(self.HOST + "/Despiertate"):
                     pass
+    
+    
     
     async def run_server(self):
         server = web.Application()
