@@ -51,7 +51,10 @@ class PyrogramInit():
         await self.app.start()
         print(green('BOT INICIADO'))
         
-        await self.user_bot.start()
+        try:
+            await self.user_bot.start()
+        except Exception as x:
+            print(x)
         print(green('USER-BOT INICIADO'))
         
         await runner.setup()
