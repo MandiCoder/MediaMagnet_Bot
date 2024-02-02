@@ -7,7 +7,7 @@ from asyncio import sleep as asyncsleep
 from aiohttp import web
 from dotenv import load_dotenv
 from os import getenv
-from modules.server import download_file
+from modules.server import download_file, video_handler
 
 load_dotenv()
 
@@ -29,6 +29,7 @@ class PyrogramInit():
         self.app = Client(name='TelegramBot', api_hash=self.API_HASH, api_id=self.API_ID, bot_token=self.BOT_TOKEN)
         self.user_bot = Client("UserBot", api_id=self.API_ID, api_hash=self.API_HASH, bot_token=self.BOT_TOKEN, session_string=self.SESSION_STRING)
         
+        
     def iniciar_bot(self):
         print(green("INICIANDO BOT"))
         self.app.loop.run_until_complete(self.run_server())
@@ -49,6 +50,7 @@ class PyrogramInit():
         server = web.Application()
         server.router.add_get("/file/downloads/{route}/{file_name}", download_file)
         server.router.add_get("/", index)
+        server.router.add_get("/video/downloads/{username}/{file_name}", video_handler)
         runner = web.AppRunner(server)
         
         await self.app.start()

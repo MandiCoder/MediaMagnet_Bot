@@ -50,8 +50,6 @@ async def download_file(request):
 
 
 
-
-
 async def index(request):
     file_path = "./templates/index.html"
     # Envio de Parametros al HTML
@@ -61,3 +59,16 @@ async def index(request):
         template = jinja2.Template(file.read())
         html = template.render(data)
     return web.Response(text=html, content_type="text/html")
+
+
+
+async def video_handler(request):
+    username = request.match_info["username"]
+    file = request.match_info["file_name"]
+    
+
+    with open(os.path.join('downloads', username, file), 'rb') as f:
+        video_data = f.read()
+
+    headers = {'Content-Type': 'video/mp4'}
+    return web.Response(body=video_data, headers=headers)

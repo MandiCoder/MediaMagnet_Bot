@@ -1,5 +1,5 @@
 from pyrogram.types import InlineKeyboardButton
-from os.path import splitext, isdir
+from os.path import splitext, isdir, basename
 from os import getenv
 
 HOST=getenv("HOST")
@@ -14,6 +14,7 @@ def addButtons(file:str, msg:object, username:str):
             [InlineKeyboardButton('🗂 EXTRAER IMAGENES', callback_data=f'extract_img {msg.text.split("_")[-1]}')],
             [InlineKeyboardButton('🚮 ELIMINAR', callback_data=f'del_file {msg.text.split("_")[-1]}')],
             [InlineKeyboardButton('🌄 AGREGAR IMAGEN', callback_data=f'add_thumb {msg.text.split("_")[-1]}')],
+            [InlineKeyboardButton('🔗 ENLACE', url=url_video)],
         ]
 
     elif file.endswith(".torrent"):
