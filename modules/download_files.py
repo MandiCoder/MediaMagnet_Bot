@@ -30,6 +30,16 @@ def downloadFiles(app, chat_id, url, path_download, video_quality, userbot):
                     ydl.download([url])
 
 
+
+        elif 'https://youtu' in url and 'playlist?' in url: # ------------------------------------------- DESCARGAR PLAYLISTS DE YOUTUBE
+            ytdl = YoutubeDL(progressytdl, sms, app, False)
+            try:
+                ytdl.downloadlist(url, path_download)
+            except Exception as e:
+                print(e)
+
+
+
         elif 'https://youtu' in url: # ------------------------------------------- DESCARGAR VIDEOS DE YOUTUBE
             ytdl = YoutubeDL(progressytdl, sms, app, False)
             try:

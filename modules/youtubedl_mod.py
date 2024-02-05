@@ -219,7 +219,7 @@ class YoutubeDL:
         # file = './'+playlist+'/%(title)s.%(ext)s'
         ydl_opts = {
             # "format": "bestvideo+bestaudio",
-            "format": f"b[height<=720]",
+            "format": "b[height<=720]",
             "outtmpl": file,
             "restrict_filenames": False,
             "windowsfilenames": False,
