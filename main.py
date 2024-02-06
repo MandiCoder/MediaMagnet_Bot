@@ -250,10 +250,9 @@ def comprimirCarpeta(app, callback):
         list_files.add(join(folder, file))
     
     callback.message.delete()
-    compressFiles(app, callback.message, list_files, basename(folder), path)
-
-
-
+    file = compressFiles(app, callback.message, list_files, basename(folder), path, True)
+    uploadFile(app, callback.message, file, username)
+    unlink(file)
 
 
 

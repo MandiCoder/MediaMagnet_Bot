@@ -22,6 +22,15 @@ def downloadFiles(app, chat_id, url, path_download, video_quality, userbot):
                 'outtmpl': join(path_download, '%(title)s.%(ext)s')    
             }
     
+    keywords = [
+        "youtu.be",
+        "twitch",
+        "fb.watch",
+        "www.xvideos.com",
+        "www.xnxx.com",
+        "www.yourupload.com",
+    ]
+    
     try:
         sms = app.send_message(chat_id, "🚚 **Descargando archivo...**")
 
@@ -40,13 +49,15 @@ def downloadFiles(app, chat_id, url, path_download, video_quality, userbot):
 
 
 
-        elif 'https://youtu' in url: # ------------------------------------------- DESCARGAR VIDEOS DE YOUTUBE
+        if any(keyword in url for keyword in keywords): # ------------------------------------------- DESCARGAR VIDEOS DE YOUTUBE
             ytdl = YoutubeDL(progressytdl, sms, app, False)
+            format = ytdl.info(url)[-1]
             try:
                 ytdl.download(url, path_download, video_quality)
             except Exception as e:
                 print(e)
-                ytdl.download(url, path_download, 18)
+                ytdl.download(url, path_download, format.split(':')[0])
+            
             
             
         elif 'instagram.com' in url: # ------------------------------------------- DESCARGAR REELS DE INSTAGRAM

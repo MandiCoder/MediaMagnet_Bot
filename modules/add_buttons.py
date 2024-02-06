@@ -27,7 +27,7 @@ def addButtons(file:str, msg:object, username:str):
     elif isdir(file):
         lista_botones = [
             [InlineKeyboardButton('📂 ABRIR', callback_data=f'open_folder {msg.text.split("_")[-1]}'),
-             InlineKeyboardButton('📦 COMPRIMIR', callback_data=f'compress_folder {msg.text.split("_")[-1]}')],
+             InlineKeyboardButton('📦 SUBIR', callback_data=f'compress_folder {msg.text.split("_")[-1]}')],
             [InlineKeyboardButton('📝 CAMBIAR NOMBRE', callback_data=f'rename {msg.text.split("_")[-1]}'),
              InlineKeyboardButton('🚮 ELIMINAR', callback_data=f'del_file {msg.text.split("_")[-1]}')],          
         ]

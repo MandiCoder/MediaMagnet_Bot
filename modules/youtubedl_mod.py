@@ -110,55 +110,21 @@ class YoutubeDL:
         id = []
         ext = []
         formato = []
-        FILESIZE = []
         for format in formats:
             if "youtu" in url:
-                if format['vcodec'] != 'none' and format['acodec'] != 'none':
-                    try:
-                        if "filesize_approx" in format.keys():
-                            SIZE = round(format["filesize_approx"] / 1e6, 2)
-                        elif "filesize" in format.keys():
-                            SIZE = round(format["filesize"] // 1e6, 2)
-                        else:
-                            SIZE = 0
-                        if SIZE > 1000:
-                            SIZE = SIZE // 1000
-                            SIZE = str(SIZE) + " GB"
-                        else:
-                            SIZE = str(SIZE) + " MB"
-                        FILESIZE.append(SIZE)
-                    except Exception as e:
-                        print(e)
-                        FILESIZE.append("No Disponible")
-                        
+                if format['vcodec'] != 'none' and format['acodec'] != 'none':   
                     id.append(format["format_id"])
                     ext.append(format["ext"])
                     formato.append(format["format"].split(sep="-")[-1])
 
             else:
                 if "mhtml" not in format["ext"] and "ultralow" not in format["format"]:
-                    try:
-                        if "filesize_approx" in format.keys():
-                            SIZE = round(format["filesize_approx"] / 1e6, 2)
-                        elif "filesize" in format.keys():
-                            SIZE = round(format["filesize"] // 1e6, 2)
-                        else:
-                            SIZE = 0
-                        if SIZE > 1000:
-                            SIZE = SIZE // 1000
-                            SIZE = str(SIZE) + " GB"
-                        else:
-                            SIZE = str(SIZE) + " MB"
-                        FILESIZE.append(SIZE)
-                    except Exception as e:
-                        print(e)
-                        FILESIZE.append("No Disponible")
                     id.append(format["format_id"])
                     ext.append(format["ext"])
                     formato.append(format["format"].split(sep="-")[-1])
         guardar = []
-        for val1, val2, val3, val4 in zip(id, ext, formato, FILESIZE):
-            guardar.append(val1 + ":" + val3 + ":" + val2 + ":" + val4)
+        for val1, val2, val3 in zip(id, ext, formato):
+            guardar.append(val1 + ":" + val3 + ":" + val2)
 
         return guardar
 
