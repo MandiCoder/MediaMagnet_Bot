@@ -13,7 +13,8 @@ class googleDrive():
         
         
     def login(self):
-        gauth = GoogleAuth()
+        gauth = GoogleAuth(settings_file="secret/client_secret.json")
+        # gauth.LocalWebserverAuth()
         gauth.LoadCredentialsFile(self._credential_path)
         
         if gauth.access_token_expired:
@@ -57,8 +58,7 @@ class googleDrive():
                 pass
             self._second = localtime().tm_sec
         
-        
-        # percentage = (bytes_transferred / file_size) * 100
-        # print(f"Descargado: {percentage}%", end='\r')
-        # sys.stdout.flush()
+        percentage = (bytes_transferred / file_size) * 100
+        print(f"Descargado: {percentage}%", end='\r')
+        sys.stdout.flush()
             

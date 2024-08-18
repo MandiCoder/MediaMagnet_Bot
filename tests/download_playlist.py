@@ -15,4 +15,4 @@ def descargar_playlist(url):
             print("Error")
 
 # Reemplaza 'url_de_tu_playlist' con la URL de tu lista de reproducción de YouTube
-descargar_playlist("https://youtube.com/playlist?list=PL0gZ8Ba6dZ7KqKGpl97skDQ06hmk3vq7L&si=QqfaqbQdafcyQ_2k")
+descargar_playlist("https://youtube.com/playlist?list=PLeySRPnY35dFQdgr7yzRYQxZjdnFdwjGC&si=42GY_oNNeUz440Sb")
