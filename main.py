@@ -1,23 +1,23 @@
 # MIS MODULOS
-from modules.download_files_telegram import download_files_telegram
-from modules.pyrogram_init import PyrogramInit
-from modules.show_files import showFiles
-from modules.download_files import downloadFiles
-from modules.upload_files import uploadFile
-from modules.database import create_db, update_db, read_db
-from modules.auto_upload import autoUpload
-from modules.extract_images import extractImages
-from modules.torrentp.torrent_downloader import TorrentDownloader
-from modules.compress_files import compressFiles
-from modules.add_buttons import addButtons
-from modules.global_variables import (btn_general, btn_opciones, userFiles, 
-                                      download_queues, download_queues_url, access_bot,
+from src.modules.download_files_telegram import download_files_telegram
+from src.modules.pyrogram_init import PyrogramInit
+from src.modules.show_files import showFiles
+from src.modules.download_files import downloadFiles
+from src.modules.upload_files import uploadFile
+from src.modules.database import create_db, update_db, read_db
+from src.modules.auto_upload import autoUpload
+from src.modules.extract_images import extractImages
+from src.modules.torrentp.torrent_downloader import TorrentDownloader
+from src.modules.compress_files import compressFiles
+from src.modules.add_buttons import addButtons
+from src.classes.google_drive import googleDrive
+from src.modules.global_variables import (btn_general, btn_opciones, userFiles, 
+                                      download_queues, download_queues_url,
                                       user_path)
-
 # MODULOS EXTERNOS
 from pickle import dump, load
 from pyrogram import filters
-from pyrogram.types import (InlineKeyboardMarkup, ForceReply)
+from pyrogram.types import (InlineKeyboardMarkup, ForceReply, InlineKeyboardButton)
 from os.path import join, basename, exists, isfile, isdir, dirname
 from os import unlink, rename, listdir, makedirs
 from queue import Queue as cola
@@ -33,8 +33,8 @@ def enviar_mensajes(app, msg):
     
     
     
-# ------------------------------------------------------------------------- VER ARCHIVOS 📁 
-@bot.app.on_message(filters.regex('📁 Archivos'))
+#! ------------------------------------------------------------------------- VER ARCHIVOS 📁 
+@bot.app.on_message(filters.command("files"))
 def mostrar_archivos(app, msg):
     username = msg.from_user.username
     file_path = join('archive', username, 'message.pkl')
@@ -56,7 +56,35 @@ def mostrar_archivos(app, msg):
 
 
 
-# ------------------------------------------------------------------------- BORRAR TODOS LOS ARCHIVOS 🗑
+#! ------------------------------------------------------------------------- VER ARCHIVOS EN DRIVE 📁 
+@bot.app.on_message(filters.command("drive"))
+def list_files(app, msg):
+    sms = msg.reply("⏱** Procesando**", disable_web_page_preview=True)
+    drive = googleDrive()
+    files = drive.ver_archivos()
+    about = drive.drive.GetAbout()
+
+    total_quota = int(about['quotaBytesTotal'])
+    used_quota = int(about['quotaBytesUsed'])
+    free_quota = total_quota - used_quota
+    
+    txt = "☁️** Archivos en la nube: **\n"
+    for count, file in enumerate(files):
+        txt += f"**__[{file['title']}]({file['download_url']})__ | {file['file_size']}\n**"
+        txt += f"**  ➥ /rm_{count}\n\n**"
+    txt += "\n︵‿︵‿︵‿︵‿︵‿︵‿︵‿︵‿︵‿︵‿︵\n"
+    txt += f"**➤ Espacio total: --__{total_quota/1024**3:.2f} GB__--**\n"
+    txt += f"**➤ Espacio usado: --__{used_quota/1024**3:.2f} GB__--**\n"
+    txt += f"**➤ Espacio libre: --__{free_quota/1024**3:.2f} GB__--**\n"
+    sms.edit_text(txt, disable_web_page_preview=True)
+
+
+@bot.app.on_message(filters.create(lambda f, c, u: u.text.startswith('/rm_')))
+def borrar_drive(app, msg):
+    print(msg.text)
+
+
+#! ------------------------------------------------------------------------- BORRAR TODOS LOS ARCHIVOS 🗑
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "borrar_todo" in u.data))
 def borrarTodo(app, callback):
     path_downloads = join('downloads', callback.from_user.username)
@@ -75,7 +103,7 @@ def borrarTodo(app, callback):
     
     
 
-# ------------------------------------------------------------------------- COMPRIMIR ARCHIVOS 📦
+#! ------------------------------------------------------------------------- COMPRIMIR ARCHIVOS 📦
 @bot.app.on_message(filters.regex('📦 Comprimir todo'))
 def enviar_mensaje_comprimir(app, msg):
     eliminarMensaje(msg.from_user.username, msg.id)
@@ -105,7 +133,7 @@ def recibir_mensaje_comprimir(app, msg):
     
 
 
-# ------------------------------------------------------------------------- OPCIONES GENERALES ⚙️
+#! ------------------------------------------------------------------------- OPCIONES GENERALES ⚙️
 @bot.app.on_message(filters.regex('⚙️ Opciones'))
 def mostrar_opciones(app, msg):
     username = msg.from_user.username
@@ -135,7 +163,7 @@ def cambiarPesoZips(app, msg):
         msg.reply('**❌ ERROR: Debe introducir un numero**', reply_markup=btn_general)
     
 
-# ---------------------------------------------------------------------- DESCARGAR DE ENLACES
+#! ---------------------------------------------------------------------- DESCARGAR DE ENLACES
 @bot.app.on_message(filters.text & filters.create(lambda f, c, u: u.text.startswith('http')) |
                     filters.text & filters.create(lambda f, c, u: u.text.startswith('magnet:')) & 
                     filters.private)
@@ -177,7 +205,7 @@ def descargar_archivos(username):
 
     del download_queues_url[username]
 
-# ================================================ DESCARGAR ARCHIVOS EN CANALES
+#! ================================================ DESCARGAR ARCHIVOS EN CANALES
 @bot.app.on_message(filters.command('dl'))
 def descargarArchivosEnGrupos(app, msg):
     username = msg.from_user.username
@@ -187,7 +215,7 @@ def descargarArchivosEnGrupos(app, msg):
 
 
 
-# ------------------------------------------------------------------------- OPCIONES DEL ARCHIVO ⚙️
+#! ------------------------------------------------------------------------- OPCIONES DEL ARCHIVO ⚙️
 @bot.app.on_message(filters.regex("/op_") & filters.private)
 def opcionesArchivo(app, msg):
     username = msg.from_user.username
@@ -198,7 +226,7 @@ def opcionesArchivo(app, msg):
 
 
 
-# ------------------------------------------------------------------------ AGREGAR THUMB 🌄
+#! ------------------------------------------------------------------------ AGREGAR THUMB 🌄
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "add_thumb" in u.data)) 
 def agregarThumb(app, callback):
     pass
@@ -207,8 +235,23 @@ def agregarThumb(app, callback):
     
     
     
+#! ------------------------------------------------------------------------ SUBIR A DRIVE ☁️
+@bot.app.on_callback_query(filters.create(lambda f, c, u: "upload_drive" in u.data))
+def abrirCarpeta(app, callback):
+    sms = callback.message
+    sms.edit_text("**🚀 Subiendo a GoogleDrive ☁️**")
+    file = userFiles[callback.from_user.username][int(callback.data.split(' ')[-1])]
+    drive = googleDrive()
+    url = drive.subir_archivo(file)
+    sms.edit_text(f"**✅ {basename(file)}**", reply_markup=InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("🔗 DESCARGAR", url=url)]
+        ]
+    ))
     
-# ------------------------------------------------------------------------ ABRIR CARPETA 📂
+    
+    
+#! ------------------------------------------------------------------------ ABRIR CARPETA 📂
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "open_folder" in u.data))
 def abrirCarpeta(app, callback):
     global user_path
@@ -220,7 +263,7 @@ def abrirCarpeta(app, callback):
 
 
 
-# ------------------------------------------------------------------------ IR ATRAS ⬅️
+#! ------------------------------------------------------------------------ IR ATRAS ⬅️
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "atras" in u.data))
 def volverAtras(app, callback):
     global user_path
@@ -232,7 +275,7 @@ def volverAtras(app, callback):
 
 
 
-# ------------------------------------------------------------------------ COMPRIMIR CARPETA 📦
+#! ------------------------------------------------------------------------ COMPRIMIR CARPETA 📦
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "compress_folder" in u.data))
 def comprimirCarpeta(app, callback):
     username = callback.from_user.username
@@ -256,7 +299,7 @@ def comprimirCarpeta(app, callback):
 
 
 
-# ------------------------------------------------------------------------ DESCARGAR ARCHIVO TORRENT 🏴‍☠️
+#! ------------------------------------------------------------------------ DESCARGAR ARCHIVO TORRENT 🏴‍☠️
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "torrentdl" in u.data))
 def descargarTorrent(app, callback):
     username = callback.from_user.username
@@ -272,7 +315,7 @@ def descargarTorrent(app, callback):
 
 
 
-# ------------------------------------------------------------------------ RENOMBRAR ARCHIVO 📝
+#! ------------------------------------------------------------------------ RENOMBRAR ARCHIVO 📝
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "rename" in u.data))
 def renombrarArchivo(app, callback):
     file = userFiles[callback.from_user.username][int(callback.data.split(' ')[-1])]
@@ -294,7 +337,7 @@ def cambiarNombre(app, msg):
     guardarMensaje(username, sms)
 
 
-# ------------------------------------------------------------------------- SUBIR UN ARCHIVO ⬆️
+#! ------------------------------------------------------------------------- SUBIR UN ARCHIVO ⬆️
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "upload" in u.data))
 def subirArchivo(app, callback):
     file = userFiles[callback.from_user.username][int(callback.data.split(' ')[-1])]
@@ -306,7 +349,7 @@ def subirArchivo(app, callback):
 
 
 
-# ------------------------------------------------------------------------- SUBIR TODO 📤
+#! ------------------------------------------------------------------------- SUBIR TODO 📤
 @bot.app.on_message(filters.regex('📤 Subir todo') & filters.private)
 def subirTodo(app, msg):
     username = msg.from_user.username
@@ -327,7 +370,7 @@ def subirTodo(app, msg):
 
 
 
-# ----------------------------------------------------------------------- EXTRAER IMAGENES 🗂
+#! ----------------------------------------------------------------------- EXTRAER IMAGENES 🗂
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "extract_img" in u.data))
 def extraerImagenes(app, callback):
     user = callback.from_user.username
@@ -337,7 +380,7 @@ def extraerImagenes(app, callback):
     
     
 
-# ---------------------------------------------------------------------- ELIMINAR UN ARCHIVO 🚮
+#! ---------------------------------------------------------------------- ELIMINAR UN ARCHIVO 🚮
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "del_file" in u.data))
 def elimiarArchivo(app, callback):
     username = callback.from_user.username
@@ -354,7 +397,7 @@ def elimiarArchivo(app, callback):
 
 
 
-# ---------------------------------------------------------------------- DESCARGAR ARCHIVOS DE TELEGRAM
+#! ---------------------------------------------------------------------- DESCARGAR ARCHIVOS DE TELEGRAM
 @bot.app.on_message(filters.media & filters.private)
 def descargarArchivosTelegram(app, message):
     # if not message.from_user.username == 'MandiCoder':
@@ -377,7 +420,7 @@ def descargarArchivosTelegram(app, message):
     # eliminarMensaje(username, message.id)
 
 
-# ---------------------------------------------------------- MANEJAR MENSAJES
+#! ---------------------------------------------------------- MANEJAR MENSAJES
 def eliminarMensaje(username:str, msg_id:int):
     file_path = join('archive', username, 'message.pkl')
     with open(file_path, 'rb') as pk:
