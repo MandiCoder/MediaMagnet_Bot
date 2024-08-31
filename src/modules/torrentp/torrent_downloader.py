@@ -3,7 +3,6 @@ from .torrent_info import TorrentInfo
 from .downloader import Downloader
 import libtorrent as lt
 
-
 class TorrentDownloader:
     def __init__(self, file_path, save_path, message_telegram):
         self._file_path = file_path

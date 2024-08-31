@@ -1,16 +1,12 @@
 from pyrogram.types import InlineKeyboardButton
 from os.path import splitext, isdir, basename
 from os import getenv
-from magic import Magic
 
 HOST=getenv("HOST")
 
 def addButtons(file:str, msg:object, username:str):
     url = f"{HOST}/file/downloads/{username}/{basename(file)}".replace(' ', '%20')
     url_video = f"{HOST}/video/downloads/{username}/{basename(file)}".replace(' ', '%20')
-    
-    m = Magic()
-    type = m.from_file(file)
     
     lista_botones = [
             [InlineKeyboardButton('⬆️ SUBIR A TELEGRAM', callback_data=f'upload {msg.text.split("_")[-1]}')],
