@@ -13,7 +13,7 @@ from src.modules.add_buttons import addButtons
 from src.classes.google_drive import googleDrive
 from src.modules.global_variables import (btn_general, btn_opciones, userFiles, 
                                       download_queues, download_queues_url,
-                                      user_path)
+                                      user_path, progreso_usuarios)
 # MODULOS EXTERNOS
 from pickle import dump, load
 from pyrogram import filters
@@ -24,6 +24,8 @@ from queue import Queue as cola
 from shutil import rmtree
 
 bot = PyrogramInit()
+
+
 
 @bot.app.on_message(filters.command('start'))
 def enviar_mensajes(app, msg):
@@ -100,7 +102,27 @@ def borrarTodo(app, callback):
     callback.message.reply(f'**✅ {c} Archivos eliminados**')
     
     
-    
+
+#! ------------------------------------------------------------------------- SUBIR TODOS LOS ARCHIVOS A GOOGLE DRIVE ☁️
+@bot.app.on_callback_query(filters.create(lambda f, c, u: "subir_drive" in u.data))
+def subirTodoDrive(app, callback):
+    username = callback.from_user.username
+    eliminarMensaje(username, callback.message.id)
+    text = "**☁️ Subiendo archivos a GoogleDrive...**\n"
+
+    sms = callback.message.reply(text)
+    drive = googleDrive()
+    if username not in user_path:
+        path_downloads = join('downloads', username)
+    else:
+        path_downloads = user_path[username]
+
+    for file in listdir(path_downloads):
+        path = join(path_downloads, file)
+        url = drive.subir_archivo(path)
+        text += f"\n✅**[{file}]({url})**"
+        sms.edit_text(text, disable_web_page_preview=True)
+
     
 
 #! ------------------------------------------------------------------------- COMPRIMIR ARCHIVOS 📦
@@ -111,6 +133,8 @@ def enviar_mensaje_comprimir(app, msg):
     text += "**\n\nEjemplo: `\n    MiArchivoZip\n    MiContraseña`**"
     msg.reply(text, reply_markup=ForceReply(placeholder="Nombre del archivo:"))
     
+
+
 @bot.app.on_message(filters.reply & filters.create(lambda f, c, u: u.reply_to_message.text.startswith('📝 Ingrese el nombre del archivo:')))
 def recibir_mensaje_comprimir(app, msg):
     bot.app.delete_messages(msg.chat.id, (msg.id, msg.reply_to_message.id))
@@ -237,7 +261,7 @@ def agregarThumb(app, callback):
     
 #! ------------------------------------------------------------------------ SUBIR A DRIVE ☁️
 @bot.app.on_callback_query(filters.create(lambda f, c, u: "upload_drive" in u.data))
-def abrirCarpeta(app, callback):
+def subirGoogleDrive(app, callback):
     sms = callback.message
     sms.edit_text("**🚀 Subiendo a GoogleDrive ☁️**")
     file = userFiles[callback.from_user.username][int(callback.data.split(' ')[-1])]
@@ -433,6 +457,27 @@ def guardarMensaje(username:str, sms:object):
     
     with open(join(file_path), 'wb') as pk:
         dump(sms, pk)
+        
+
+@bot.app.on_callback_query()
+def enviar_mensaje(app, callback):
+    msg = callback.message
+    username:str = callback.from_user.username
+    
+    if callback.data == "compress":
+        msg.reply_text("**🏷 Introduzca el nombre para el archivo:**", 
+                    reply_markup=ForceReply(placeholder="Nombre:"))
+        msg.delete()
+
+    
+    elif callback.data == "progress":
+        callback.answer(progreso_usuarios[username], show_alert=True)
+
+
+    # elif callback.data == "cancel_progreso":
+    #     msg.delete()
+    #     detener_progreso[username] = True
+    #     show_data(msg, username)  
 
 if __name__ == '__main__':
     bot.iniciar_bot()

@@ -1,7 +1,7 @@
 from os import listdir, rename, makedirs
 from os.path import join, isfile, getsize, dirname, exists
 from src.modules.global_variables import userFiles, user_path
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from unicodedata import normalize
 import re
 
@@ -19,16 +19,19 @@ def showFiles(msg, usr, path_user):
     if not exists(path_user):
         makedirs(path_user)
         
-    btn = [ [InlineKeyboardButton('🗑 BORRAR TODO', callback_data='borrar_todo')] ]
+    btn = [
+        [InlineKeyboardButton(
+                '🔗 ENLACES', 
+                web_app=WebAppInfo(url=f'https://k53xxw3b-8000.usw3.devtunnels.ms/files/{usr}')
+            )],
+        [InlineKeyboardButton('🗑 BORRAR TODO', callback_data='borrar_todo')],
+        [InlineKeyboardButton('☁️ SUBIR TODO A DRIVE', callback_data='subir_drive')]
+    ]
     
-    if 'downloads' == dirname(path_user):
-        btn = [ [InlineKeyboardButton('🗑 BORRAR TODO', callback_data='borrar_todo')] ]
-        
-    else:
-        btn = [
-            [InlineKeyboardButton('🗑 BORRAR TODO', callback_data='borrar_todo')],
+    if 'downloads' != dirname(path_user):
+        btn.append(
             [InlineKeyboardButton('⬅️ ATRAS', callback_data='atras')]
-        ]
+        )
         
     for count, file in enumerate(listdir(path_user)):
         path_files = join(path_user, file)

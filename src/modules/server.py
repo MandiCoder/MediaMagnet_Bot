@@ -1,8 +1,9 @@
-import asyncio
 import jinja2
+import aiohttp_jinja2
 import os
 from aiohttp import web
 from aiohttp import streamer
+from .show_files import sizeof
 
 """==============Envio de el Archivo por HTTP================="""
 
@@ -17,19 +18,8 @@ async def file_sender(writer, file_path=None):
 """===============Servicio de Recepcion de la Peticion GET==================="""
 
 async def download_file(request):
-    """
-    La función `download_file` es una función asíncrona que descarga un archivo especificado por los
-    parámetros `file_name` y `route` y lo devuelve como una respuesta web.
-
-    :param request: El parámetro `request` es un objeto que representa la solicitud HTTP realizada por
-    el cliente. Contiene información como el método de solicitud, encabezados, parámetros de URL y el
-    cuerpo de la solicitud. En este fragmento de código, se utiliza para extraer `file_name` y `route`
-    de la ruta URL
-    :return: un objeto web.Response.
-    """
     file_name = request.match_info["file_name"]
     route = request.match_info["route"]
-
     file_path = os.path.join('downloads', route, file_name)
     headers = {
         "Content-disposition": "attachment; filename={file_name}".format(
@@ -61,14 +51,35 @@ async def index(request):
     return web.Response(text=html, content_type="text/html")
 
 
+@aiohttp_jinja2.template('user.html')
+async def list_files(request):
+    user = request.match_info.get('user')
+    path = f"downloads/{user}"
+    archivos = []
+    for file in os.listdir(path):
+        path_file = os.path.join(path, file)
+        if os.path.isfile(path_file):
+            size = sizeof(os.path.getsize(path_file))
+            archivos.append(
+                {
+                    'peso'   : size,
+                    'ruta'   : path_file,
+                    'nombre' : file,
+                    'enlace' : os.path.join(os.getenv('HOST'), "files", path_file)
+                }
+            )
+        
+    return {
+        'archivos': archivos,
+        'usuario' : user
+    }
+
+
 
 async def video_handler(request):
     username = request.match_info["username"]
     file = request.match_info["file_name"]
-    
-
     with open(os.path.join('downloads', username, file), 'rb') as f:
         video_data = f.read()
-
     headers = {'Content-Type': 'video/mp4'}
     return web.Response(body=video_data, headers=headers)

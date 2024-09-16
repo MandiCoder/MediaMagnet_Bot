@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Archivos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #2b2b2b; /* Color de fondo oscuro */
+            color: #ffffff; /* Color de texto blanco */
+        }
+
+        h1 {
+            color: #66d9ef; /* Color del título */
+        }
+
+        table {
+            border-radius: 0.5rem; /* Bordes redondeados para la tabla */
+            overflow: hidden; /* Para que los bordes redondeados se apliquen */
+        }
+
+        thead th {
+            background-color: #3a3a3a; /* Color de fondo de los encabezados */
+        }
+
+        tbody tr {
+            transition: background-color 0.3s; /* Efecto de transición */
+        }
+
+        tbody tr:hover {
+            background-color: #4a4a4a; /* Color de fondo al pasar el mouse */
+        }
+
+        .btn-custom {
+            background-color: #66d9ef; /* Color del botón */
+            color: #2b2b2b; /* Color del texto del botón */
+        }
+
+        .btn-custom:hover {
+            background-color: #57c7e5; /* Color del botón al pasar el mouse */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Lista de Archivos</h1>
+        <div class="table-responsive">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Peso</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for archivo in archivos %}
+                    <tr>
+                        <td>{{ archivo.peso }}</td>
+                        <td>
+                            <a href="{{ archivo.ruta }}">{{ archivo.nombre }}</a>
+                        </td>
+                        <td>
+                            <button class="btn btn-custom" onclick="copyToClipboard('{{ archivo.enlace }}')">
+                                <i class="fas fa-copy"></i> Copiar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function () {
+                alert('Enlace copiado al portapapeles: ' + text);
+            }, function (err) {
+                console.error('Error al copiar: ', err);
+            });
+        }
+    </script>
+</body>
+
+</html>

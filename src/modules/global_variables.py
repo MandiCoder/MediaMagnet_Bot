@@ -6,10 +6,12 @@ download_queues = {}
 download_queues_url = {}
 user_path = {}
 
+progreso_usuarios = {}
+detener_progreso = {}
 
 # BOTONES
 btn_general = ReplyKeyboardMarkup([
-        ['📁 Archivos', '⚙️ Opciones'],
+        ['⚙️ Opciones'],
         ['📤 Subir todo', '📦 Comprimir todo'],
     ], resize_keyboard=True, one_time_keyboard=True)
 

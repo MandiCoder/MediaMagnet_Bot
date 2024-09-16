@@ -1,13 +1,15 @@
 from pyrogram.methods.utilities.idle import idle
 from src.modules.ansi import green, red, purple
 from src.modules.server import download_file, video_handler
-from .server import index
+from .server import index, list_files
 from pyrogram import Client
 from aiohttp import ClientSession
 from asyncio import sleep as asyncsleep
 from aiohttp import web
 from dotenv import load_dotenv
 from os import getenv
+import aiohttp_jinja2
+import jinja2
 
 load_dotenv()
 
@@ -48,8 +50,10 @@ class PyrogramInit():
     
     async def run_server(self):
         server = web.Application()
-        server.router.add_get("/file/downloads/{route}/{file_name}", download_file)
+        aiohttp_jinja2.setup(server, loader=jinja2.FileSystemLoader('templates'))
+        server.router.add_get("/files/downloads/{route}/{file_name}", download_file)
         server.router.add_get("/", index)
+        server.router.add_get("/files/{user}", list_files)
         server.router.add_get("/video/downloads/{username}/{file_name}", video_handler)
         runner = web.AppRunner(server)
         

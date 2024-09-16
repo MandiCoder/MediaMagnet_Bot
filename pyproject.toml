@@ -10,7 +10,6 @@ package-mode = false
 python = "^3.10.11"
 pydrive2 = "^1.19.0"    
 pyrogram = "^2.0.106"
-watchdog = "^3.0.0"
 yt-dlp = "^2023.12.30"
 aiohttp = "^3.9.1"
 opencv-contrib-python-headless = "^4.9.0.80"
@@ -21,7 +20,7 @@ bs4 = "^0.0.1"
 torrentp = "^0.1.6"
 jinja2 = "^3.1.2"
 python-dotenv = "^1.0.0"
-mediafire = "^0.6.1"
+aiohttp-jinja2 = "^1.6"
 
 
 [build-system]
